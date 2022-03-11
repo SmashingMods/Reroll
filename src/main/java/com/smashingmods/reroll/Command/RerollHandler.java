@@ -1,7 +1,6 @@
 package com.smashingmods.reroll.Command;
 
 import com.smashingmods.reroll.Config.Config;
-import net.minecraft.client.gui.recipebook.RecipeList;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandTeleport;
@@ -29,14 +28,11 @@ public class RerollHandler {
         resetLocation(server, sender, entityPlayer);
     }
 
-    public static double getRandomNumber(double min, double max) {
-        return ((Math.random() * (max - min)) + min);
-    }
-
     public static void setRerollInventory(EntityPlayer entityPlayer) {
 
         entityPlayer.inventory.mainInventory.clear();
         entityPlayer.inventory.armorInventory.clear();
+        entityPlayer.inventory.offHandInventory.clear();
         entityPlayer.getInventoryEnderChest().clear();
 
         List<ItemStack> items = new ArrayList<>();
@@ -89,6 +85,22 @@ public class RerollHandler {
         }
     }
 
+    public static void resetLocation(MinecraftServer server, ICommandSender sender, EntityPlayer entityPlayer) {
+        CommandTeleport commandTeleport = new CommandTeleport();
+
+        BlockPos blockPos = generateValidBlockPos(entityPlayer);
+        try {
+            commandTeleport.execute(server, sender, new String[] {entityPlayer.getName(), String.valueOf(blockPos.getX()), String.valueOf(blockPos.getY()), String.valueOf(blockPos.getZ())});
+        } catch (CommandException e) {
+            com.smashingmods.reroll.Reroll.LOGGER.error("Reroll command failed, unable to set player position: " + e);
+            entityPlayer.sendMessage(new TextComponentString("Something went wrong, try again!").setStyle(new Style().setColor(TextFormatting.RED)));
+        } finally {
+            entityPlayer.setSpawnDimension(Config.useCurrentDim ? entityPlayer.dimension : Config.overrideDim);
+            entityPlayer.setSpawnPoint(blockPos, true);
+        }
+        entityPlayer.bedLocation = blockPos;
+    }
+
     public static BlockPos generateValidBlockPos(EntityPlayer entityPlayer) {
 
         BlockPos newPosition = new BlockPos(new Vec3d(getRandomNumber(entityPlayer.posX - Config.rerollRange, entityPlayer.posX + Config.rerollRange) + Config.minDistance, 75, getRandomNumber(entityPlayer.posZ - Config.rerollRange, entityPlayer.posZ + Config.rerollRange) + Config.minDistance));
@@ -118,19 +130,7 @@ public class RerollHandler {
         return toReturn;
     }
 
-    public static void resetLocation(MinecraftServer server, ICommandSender sender, EntityPlayer entityPlayer) {
-        CommandTeleport commandTeleport = new CommandTeleport();
-
-        BlockPos blockPos = generateValidBlockPos(entityPlayer);
-        try {
-            commandTeleport.execute(server, sender, new String[] {entityPlayer.getName(), String.valueOf(blockPos.getX()), String.valueOf(blockPos.getY()), String.valueOf(blockPos.getZ())});
-        } catch (CommandException e) {
-            com.smashingmods.reroll.Reroll.LOGGER.error("Reroll command failed, unable to set player position: " + e);
-            entityPlayer.sendMessage(new TextComponentString("Something went wrong, try again!").setStyle(new Style().setColor(TextFormatting.RED)));
-        } finally {
-            entityPlayer.setSpawnDimension(Config.useCurrentDim ? entityPlayer.dimension : Config.overrideDim);
-            entityPlayer.setSpawnPoint(blockPos, true);
-        }
-        entityPlayer.bedLocation = blockPos;
+    public static double getRandomNumber(double min, double max) {
+        return ((Math.random() * (max - min)) + min);
     }
 }
