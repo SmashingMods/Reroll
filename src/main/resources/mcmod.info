@@ -1,0 +1,16 @@
+[
+{
+  "modid": "reroll",
+  "name": "Reroll",
+  "description": "Description TBD.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["DarkArcana"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
