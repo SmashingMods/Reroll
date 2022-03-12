@@ -2,6 +2,7 @@ package com.smashingmods.reroll.Command;
 
 import com.smashingmods.reroll.Config.Config;
 import com.smashingmods.reroll.Reroll;
+import net.minecraft.command.AdvancementCommand;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandTeleport;
@@ -32,6 +33,8 @@ public class RerollHandler {
         entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.DARK_AQUA)));
         setRerollInventory(entityPlayer);
         resetData(entityPlayer);
+        resetModData(entityPlayer);
+        resetAdvancements(server, sender, entityPlayer);
         resetLocation(server, sender, entityPlayer);
     }
 
@@ -89,9 +92,9 @@ public class RerollHandler {
         entityPlayer.stopActiveHand();
         entityPlayer.removePassengers();
         entityPlayer.dismountRidingEntity();
+    }
 
-        // Mod Compatibility
-
+    public static void resetModData(EntityPlayerMP entityPlayer) {
         if (com.smashingmods.reroll.Reroll.ModCompat_TimeIsUp) {
             TimerCapability timer = entityPlayer.getCapability(TimeIsUp.TIMER, null);
 
@@ -102,6 +105,16 @@ public class RerollHandler {
                     PacketHandler.INSTANCE.sendTo(new TimerPacket(Config.timeisupTimer), entityPlayer);
                 }
             }
+        }
+    }
+
+    public static void resetAdvancements(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
+        AdvancementCommand advancementCommand = new AdvancementCommand();
+
+        try {
+            advancementCommand.execute(server, sender, new String[]{"revoke", entityPlayer.getName(), "everything"});
+        } catch (CommandException e) {
+            Reroll.LOGGER.error("Couldn't reset advancements: " + e);
         }
     }
 
