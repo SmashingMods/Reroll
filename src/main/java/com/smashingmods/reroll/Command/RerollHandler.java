@@ -2,10 +2,7 @@ package com.smashingmods.reroll.Command;
 
 import com.smashingmods.reroll.Config.Config;
 import com.smashingmods.reroll.Reroll;
-import net.minecraft.command.AdvancementCommand;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandTeleport;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -14,7 +11,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -31,19 +27,23 @@ public class RerollHandler {
 
     public static void reroll(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
         entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.DARK_AQUA)));
+        resetInventory(entityPlayer);
         setRerollInventory(entityPlayer);
-        resetData(entityPlayer);
+        resetData(server, sender, entityPlayer);
         resetModData(entityPlayer);
-        resetAdvancements(server, sender, entityPlayer);
         resetLocation(server, sender, entityPlayer);
     }
 
-    public static void setRerollInventory(EntityPlayerMP entityPlayer) {
-
+    public static void resetInventory(EntityPlayerMP entityPlayer) {
+        entityPlayer.closeContainer();
         entityPlayer.inventory.mainInventory.clear();
         entityPlayer.inventory.armorInventory.clear();
         entityPlayer.inventory.offHandInventory.clear();
         entityPlayer.getInventoryEnderChest().clear();
+        entityPlayer.inventory.dropAllItems();
+    }
+
+    public static void setRerollInventory(EntityPlayerMP entityPlayer) {
 
         List<ItemStack> items = new ArrayList<>();
 
@@ -74,7 +74,7 @@ public class RerollHandler {
         });
     }
 
-    public static void resetData(EntityPlayerMP entityPlayer) {
+    public static void resetData(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
 
         entityPlayer.setHealth(20);
         entityPlayer.setAir(300);
@@ -92,6 +92,8 @@ public class RerollHandler {
         entityPlayer.stopActiveHand();
         entityPlayer.removePassengers();
         entityPlayer.dismountRidingEntity();
+
+        server.getCommandManager().executeCommand(sender, String.format("/advancement revoke %s everything", entityPlayer.getName()));
     }
 
     public static void resetModData(EntityPlayerMP entityPlayer) {
@@ -108,29 +110,13 @@ public class RerollHandler {
         }
     }
 
-    public static void resetAdvancements(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
-        AdvancementCommand advancementCommand = new AdvancementCommand();
-
-        try {
-            advancementCommand.execute(server, sender, new String[]{"revoke", entityPlayer.getName(), "everything"});
-        } catch (CommandException e) {
-            Reroll.LOGGER.error("Couldn't reset advancements: " + e);
-        }
-    }
-
     public static void resetLocation(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
-        CommandTeleport commandTeleport = new CommandTeleport();
 
         BlockPos blockPos = generateValidBlockPos(entityPlayer);
-        try {
-            commandTeleport.execute(server, sender, new String[] {entityPlayer.getName(), String.valueOf(blockPos.getX()), String.valueOf(blockPos.getY()), String.valueOf(blockPos.getZ())});
-        } catch (CommandException e) {
-            Reroll.LOGGER.error("Reroll command failed, unable to set player position: " + e);
-            entityPlayer.sendMessage(new TextComponentString("Something went wrong, try again!").setStyle(new Style().setColor(TextFormatting.RED)));
-        } finally {
-            entityPlayer.setSpawnDimension(Config.useCurrentDim ? entityPlayer.dimension : Config.overrideDim);
-            entityPlayer.setSpawnPoint(blockPos, true);
-        }
+
+        server.getCommandManager().executeCommand(sender, String.format("/tp %s %d %d %d", sender.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+        entityPlayer.setSpawnDimension(Config.useCurrentDim ? entityPlayer.dimension : Config.overrideDim);
+        entityPlayer.setSpawnPoint(blockPos, true);
         entityPlayer.bedLocation = blockPos;
     }
 

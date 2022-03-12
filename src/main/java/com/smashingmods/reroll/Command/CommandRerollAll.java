@@ -6,15 +6,11 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.List;
-
-import static com.smashingmods.reroll.Command.RerollHandler.reroll;
 
 public class CommandRerollAll extends CommandBase implements ICommand  {
 
@@ -44,8 +40,7 @@ public class CommandRerollAll extends CommandBase implements ICommand  {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 0) {
             server.getPlayerList().getPlayers().forEach(player -> {
-                reroll(server, sender, player);
-                player.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
+                server.getCommandManager().executeCommand(player, String.format("/reroll"));
             });
             sender.sendMessage(new TextComponentTranslation("commands.rerollall.successful"));
             server.sendMessage(new TextComponentTranslation("commands.rerollall.successful"));
