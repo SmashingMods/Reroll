@@ -1,0 +1,8 @@
+commands.reroll.successful=Well, here we go again ... But hey, if you don't like it, you can always reroll!
+commands.reroll.usage=/reroll
+commands.reroll.failure=Too many arguments. Use /rerollplayer to reroll another player.
+commands.rerollplayer.successful=Rerolling for player %s.
+commands.rerollplayer.usage=/rerollplayer <player>
+commands.rerollplayer.failure=Player %s doesn't exist.
+commands.rerollall.successful=All online players have been rerolled.
+commands.rerollall.usage=/rerollall

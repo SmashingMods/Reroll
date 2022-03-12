@@ -1,13 +1,11 @@
 package com.smashingmods.reroll.Command;
 
 import com.smashingmods.reroll.Reroll;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.*;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -32,7 +30,7 @@ public class CommandRerollPlayer extends CommandBase implements ICommand  {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/rerollplayer <player>";
+        return "commands.rerollplayer.usage";
     }
 
     @Override
@@ -43,27 +41,21 @@ public class CommandRerollPlayer extends CommandBase implements ICommand  {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 
-        switch (args.length) {
-            case 0: {
-                sender.sendMessage(new TextComponentString("Must specify a player to reroll."));
-                sender.sendMessage(new TextComponentString(getUsage(sender)));
-                break;
-            }
-            case 1: {
-                try {
-                    sender.sendMessage(new TextComponentString("Rerolling for player " + args[0] + "."));
-                    reroll(server, sender, server.getPlayerList().getPlayerByUsername(args[0]));
-                } catch (Exception e) {
-                    sender.sendMessage(new TextComponentString("Player " + args[0] + " doesn't exist."));
-                    Reroll.LOGGER.error("Player " + args[0] + " doesn't exist.");
+        if (sender.getCommandSenderEntity() instanceof EntityPlayerMP) {
+            if (args.length == 1) {
+                EntityPlayerMP toReroll = server.getPlayerList().getPlayerByUsername(args[0]);
+
+                if (toReroll != null) {
+                    sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.successful", new Object[]{getCommandSenderAsPlayer(sender).getName()}));
+                    reroll(server, sender, toReroll);
+                } else {
+                    sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.failure", new Object[]{args[0]}));
                 }
-                break;
+            } else {
+                throw new WrongUsageException("commands.rerollplayer.usage");
             }
-            default: {
-                sender.sendMessage(new TextComponentString("Reroll command had too many arguments."));
-                sender.sendMessage(new TextComponentString(getUsage(sender)));
-                break;
-            }
+        } else {
+            Reroll.LOGGER.info("/rerollplayer can only be used in game.");
         }
     }
 
