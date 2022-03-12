@@ -1,9 +1,11 @@
 package com.smashingmods.reroll;
 
-import com.smashingmods.reroll.Command.CommandReroll;
-import com.smashingmods.reroll.Command.CommandRerollAll;
-import com.smashingmods.reroll.Command.CommandRerollPlayer;
-import com.smashingmods.reroll.Config.Config;
+import com.smashingmods.reroll.command.CommandReroll;
+import com.smashingmods.reroll.command.CommandRerollAll;
+import com.smashingmods.reroll.command.CommandRerollPlayer;
+import com.smashingmods.reroll.config.Config;
+import com.smashingmods.reroll.events.PlayerLoginEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -35,7 +37,8 @@ public class Reroll {
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-         ModCompat_TimeIsUp = Loader.isModLoaded("timeisup");
+        MinecraftForge.EVENT_BUS.register(new PlayerLoginEvent());
+        ModCompat_TimeIsUp = Loader.isModLoaded("timeisup");
 
         if (CONFIG.hasChanged()) {
             CONFIG.save();

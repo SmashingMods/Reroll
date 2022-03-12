@@ -1,4 +1,4 @@
-package com.smashingmods.reroll.Config;
+package com.smashingmods.reroll.config;
 
 import com.smashingmods.reroll.Reroll;
 import net.minecraftforge.common.config.Configuration;
@@ -12,6 +12,7 @@ public class Config {
     public static int minDistance;
     public static boolean useCurrentDim;
     public static int overrideDim;
+    public static boolean initialInventory;
 
     public static int timeisupTimer;
 
@@ -36,6 +37,7 @@ public class Config {
         minDistance = config.getInt("Minimum Distance", CATEGORY_REROLL, 500, 100, 100000, "Determines the minimum distance within the range.");
         useCurrentDim = config.getBoolean("Reroll Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set in the player's current dimension? If set to false, the override value will be used.");
         overrideDim = config.getInt("Override Dimension", CATEGORY_REROLL, 0, -1, 1, "Override the dimension used for the reroll spawn location");
+        initialInventory = config.getBoolean("Initial Inventory", CATEGORY_REROLL, false, "Should players get an initial inventory when they first join a world?");
 
         config.addCustomCategoryComment(CATEGORY_COMPAT, "Mod Compatibility Configuration");
         timeisupTimer = config.getInt("Time is up Timer", CATEGORY_COMPAT, 12000, 1200, Integer.MAX_VALUE, "Set the Timer value after a reroll.");

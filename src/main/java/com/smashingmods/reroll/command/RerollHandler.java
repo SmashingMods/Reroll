@@ -1,13 +1,10 @@
-package com.smashingmods.reroll.Command;
+package com.smashingmods.reroll.command;
 
-import com.smashingmods.reroll.Config.Config;
-import com.smashingmods.reroll.Reroll;
+import com.smashingmods.reroll.config.Config;
+import com.smashingmods.reroll.util.InventoryHandler;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.Style;
@@ -20,16 +17,14 @@ import timeisup.capabilities.TimerCapability;
 import timeisup.network.PacketHandler;
 import timeisup.network.TimerPacket;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RerollHandler {
 
     public static void reroll(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
         entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.DARK_AQUA)));
         resetInventory(entityPlayer);
-        setRerollInventory(entityPlayer);
+        InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
         resetData(server, sender, entityPlayer);
+        server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", entityPlayer.getName()));
         resetModData(entityPlayer);
         resetLocation(server, sender, entityPlayer);
     }
@@ -41,37 +36,6 @@ public class RerollHandler {
         entityPlayer.inventory.offHandInventory.clear();
         entityPlayer.getInventoryEnderChest().clear();
         entityPlayer.inventory.dropAllItems();
-    }
-
-    public static void setRerollInventory(EntityPlayerMP entityPlayer) {
-
-        List<ItemStack> items = new ArrayList<>();
-
-        for (String startingItem : Config.rerollItems) {
-
-            String itemString = startingItem.split(";")[0];
-            int count;
-
-            try {
-                count = Item.REGISTRY.getObject(new ResourceLocation(itemString)).getItemStackLimit() == 1 ? 1 :  Integer.parseInt(startingItem.split(";")[1]);
-
-                if (Item.REGISTRY.containsKey(new ResourceLocation(itemString))) {
-                    items.add(new ItemStack(Item.getByNameOrId(itemString), count));
-                }
-                else {
-                    Reroll.LOGGER.error(itemString + " isn't a valid registered Item. Check the config file for errors.");
-                }
-
-            } catch (NumberFormatException e) {
-                Reroll.LOGGER.error(itemString + "value isn't set to an integer: " + e);
-            } catch (NullPointerException e) {
-               Reroll.LOGGER.error("Invalid item entry in Reroll Inventory config: " + itemString);
-            }
-        }
-
-        items.forEach(item -> {
-            entityPlayer.inventory.setInventorySlotContents(items.indexOf(item), item);
-        });
     }
 
     public static void resetData(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
@@ -92,8 +56,6 @@ public class RerollHandler {
         entityPlayer.stopActiveHand();
         entityPlayer.removePassengers();
         entityPlayer.dismountRidingEntity();
-
-        server.getCommandManager().executeCommand(sender, String.format("/advancement revoke %s everything", entityPlayer.getName()));
     }
 
     public static void resetModData(EntityPlayerMP entityPlayer) {
@@ -114,7 +76,7 @@ public class RerollHandler {
 
         BlockPos blockPos = generateValidBlockPos(entityPlayer);
 
-        server.getCommandManager().executeCommand(sender, String.format("/tp %s %d %d %d", sender.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+        server.getCommandManager().executeCommand(server, String.format("/tp %s %d %d %d", sender.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
         entityPlayer.setSpawnDimension(Config.useCurrentDim ? entityPlayer.dimension : Config.overrideDim);
         entityPlayer.setSpawnPoint(blockPos, true);
         entityPlayer.bedLocation = blockPos;

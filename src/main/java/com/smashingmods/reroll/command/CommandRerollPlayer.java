@@ -1,4 +1,4 @@
-package com.smashingmods.reroll.Command;
+package com.smashingmods.reroll.command;
 
 import com.smashingmods.reroll.Reroll;
 import net.minecraft.command.*;
@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.List;
 
-import static com.smashingmods.reroll.Command.RerollHandler.reroll;
+import static com.smashingmods.reroll.command.RerollHandler.reroll;
 
 public class CommandRerollPlayer extends CommandBase implements ICommand  {
 
@@ -66,7 +66,7 @@ public class CommandRerollPlayer extends CommandBase implements ICommand  {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, sender.getServer().getOnlinePlayerNames()) : Collections.emptyList();
     }
 
     @Override

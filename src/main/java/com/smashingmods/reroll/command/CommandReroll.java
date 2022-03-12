@@ -1,4 +1,4 @@
-package com.smashingmods.reroll.Command;
+package com.smashingmods.reroll.command;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.List;
 
-import static com.smashingmods.reroll.Command.RerollHandler.reroll;
+import static com.smashingmods.reroll.command.RerollHandler.reroll;
 
 public class CommandReroll extends CommandBase implements ICommand  {
 

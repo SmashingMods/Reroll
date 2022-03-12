@@ -1,4 +1,4 @@
-package com.smashingmods.reroll.Command;
+package com.smashingmods.reroll.command;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
