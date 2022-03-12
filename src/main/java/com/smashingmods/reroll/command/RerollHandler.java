@@ -1,5 +1,8 @@
 package com.smashingmods.reroll.command;
 
+import baubles.api.BaublesApi;
+import baubles.api.inv.BaublesInventoryWrapper;
+import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.util.InventoryHandler;
 import net.minecraft.command.ICommandSender;
@@ -59,7 +62,7 @@ public class RerollHandler {
     }
 
     public static void resetModData(EntityPlayerMP entityPlayer) {
-        if (com.smashingmods.reroll.Reroll.ModCompat_TimeIsUp) {
+        if (Reroll.MODCOMPAT_TIMEISUP) {
             TimerCapability timer = entityPlayer.getCapability(TimeIsUp.TIMER, null);
 
             if (timer != null) {
@@ -69,6 +72,11 @@ public class RerollHandler {
                     PacketHandler.INSTANCE.sendTo(new TimerPacket(Config.timeisupTimer), entityPlayer);
                 }
             }
+        }
+
+        if (Reroll.MODCOMPAT_BAUBLES) {
+            BaublesInventoryWrapper wrapper = new BaublesInventoryWrapper(BaublesApi.getBaublesHandler(entityPlayer));
+            wrapper.clear();
         }
     }
 

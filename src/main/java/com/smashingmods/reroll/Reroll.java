@@ -26,7 +26,8 @@ public class Reroll {
     public static Logger LOGGER;
 
     // Mod Compatibility
-    public static boolean ModCompat_TimeIsUp;
+    public static boolean MODCOMPAT_TIMEISUP;
+    public static boolean MODCOMPAT_BAUBLES;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -38,7 +39,8 @@ public class Reroll {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new PlayerLoginEvent());
-        ModCompat_TimeIsUp = Loader.isModLoaded("timeisup");
+        MODCOMPAT_TIMEISUP = Loader.isModLoaded("timeisup");
+        MODCOMPAT_BAUBLES = Loader.isModLoaded("baubles");
 
         if (CONFIG.hasChanged()) {
             CONFIG.save();
