@@ -7,12 +7,16 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
     }
 }
+
+plugins {
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
+}
         
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.0'
+version = '1.12.2-1.0'
 group = 'com.smashingmods.reroll'
 archivesBaseName = 'reroll'
 
@@ -69,6 +73,23 @@ publishing {
     repositories {
         maven {
             url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+curseforge {
+    apiKey = '0bf5fb4f-44a2-451e-aac4-97e39b16fcad'
+    project {
+        id = '592315'
+        releaseType = 'release'
+        changelogType = 'markdown'
+        changelog = file("changelog.md")
+        addGameVersion 'Forge'
+        addGameVersion 'Java 12'
+        addGameVersion '1.12.2'
+
+        mainArtifact(jar) {
+            displayName = "Reroll $project.version"
         }
     }
 }
