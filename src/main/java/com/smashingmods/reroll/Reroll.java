@@ -28,6 +28,8 @@ public class Reroll {
     // Mod Compatibility
     public static boolean MODCOMPAT_TIMEISUP;
     public static boolean MODCOMPAT_BAUBLES;
+    public static boolean MODCOMPAT_GAMESSTAGES;
+    public static boolean MODCOMPAT_ENDERSKILLS;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -41,6 +43,8 @@ public class Reroll {
         MinecraftForge.EVENT_BUS.register(new PlayerLoginEvent());
         MODCOMPAT_TIMEISUP = Loader.isModLoaded("timeisup");
         MODCOMPAT_BAUBLES = Loader.isModLoaded("baubles");
+        MODCOMPAT_GAMESSTAGES = Loader.isModLoaded("gamestages");
+        MODCOMPAT_ENDERSKILLS = Loader.isModLoaded("enderskills");
 
         if (CONFIG.hasChanged()) {
             CONFIG.save();

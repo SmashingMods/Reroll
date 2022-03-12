@@ -26,9 +26,9 @@ public class RerollHandler {
         entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.DARK_AQUA)));
         resetInventory(entityPlayer);
         InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
-        resetData(server, sender, entityPlayer);
+        resetData(entityPlayer);
         server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", entityPlayer.getName()));
-        resetModData(entityPlayer);
+        resetModData(server, entityPlayer);
         resetLocation(server, sender, entityPlayer);
     }
 
@@ -41,7 +41,7 @@ public class RerollHandler {
         entityPlayer.inventory.dropAllItems();
     }
 
-    public static void resetData(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
+    public static void resetData(EntityPlayerMP entityPlayer) {
 
         entityPlayer.setHealth(20);
         entityPlayer.setAir(300);
@@ -61,7 +61,7 @@ public class RerollHandler {
         entityPlayer.dismountRidingEntity();
     }
 
-    public static void resetModData(EntityPlayerMP entityPlayer) {
+    public static void resetModData(MinecraftServer server, EntityPlayerMP entityPlayer) {
         if (Reroll.MODCOMPAT_TIMEISUP) {
             TimerCapability timer = entityPlayer.getCapability(TimeIsUp.TIMER, null);
 
@@ -77,6 +77,16 @@ public class RerollHandler {
         if (Reroll.MODCOMPAT_BAUBLES) {
             BaublesInventoryWrapper wrapper = new BaublesInventoryWrapper(BaublesApi.getBaublesHandler(entityPlayer));
             wrapper.clear();
+        }
+
+        if (Reroll.MODCOMPAT_GAMESSTAGES) {
+            server.getCommandManager().executeCommand(server, String.format("/gamestage clear %s", entityPlayer.getName()));
+        }
+
+        if (Reroll.MODCOMPAT_ENDERSKILLS) {
+            server.getCommandManager().executeCommand(server, String.format("/es_advancement %s retries set 0", entityPlayer.getName()));
+            server.getCommandManager().executeCommand(server, String.format("/es_advancement %s level set 1", entityPlayer.getName()));
+            server.getCommandManager().executeCommand(server, String.format("/es_skill %s reset", entityPlayer.getName()));
         }
     }
 
