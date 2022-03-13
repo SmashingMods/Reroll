@@ -15,11 +15,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(modid = com.smashingmods.reroll.Reroll.MODID, name = com.smashingmods.reroll.Reroll.NAME, version = com.smashingmods.reroll.Reroll.VERSION)
+@Mod(modid = Reroll.MODID, useMetadata = true)
 public class Reroll {
     public static final String MODID = "reroll";
-    public static final String NAME = "Reroll";
-    public static final String VERSION = "1.12.2-1.1";
     public static Configuration CONFIG;
     public static Logger LOGGER;
 

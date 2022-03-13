@@ -19,11 +19,7 @@ import static com.smashingmods.reroll.util.TagUtil.getTag;
 
 public class CommandReroll extends CommandBase implements ICommand  {
 
-    private final List aliases;
-
     public CommandReroll() {
-        aliases = new ArrayList();
-        aliases.add("rerollself");
     }
 
     @Override
@@ -38,7 +34,7 @@ public class CommandReroll extends CommandBase implements ICommand  {
 
     @Override
     public List<String> getAliases() {
-        return this.aliases;
+        return new ArrayList<>();
     }
 
     @Override
@@ -49,7 +45,7 @@ public class CommandReroll extends CommandBase implements ICommand  {
         switch (args.length) {
             case 0: {
                 if (locked) {
-                    sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", getCommandSenderAsPlayer(sender)).setStyle(new Style().setColor(TextFormatting.RED)));
+                    sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", getCommandSenderAsPlayer(sender).getName()).setStyle(new Style().setColor(TextFormatting.RED)));
                 } else {
                     reroll(server, sender, getCommandSenderAsPlayer(sender));
                 }
