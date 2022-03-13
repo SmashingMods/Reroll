@@ -1,8 +1,6 @@
 package com.smashingmods.reroll;
 
 import com.smashingmods.reroll.command.CommandReroll;
-import com.smashingmods.reroll.command.CommandRerollAll;
-import com.smashingmods.reroll.command.CommandRerollPlayer;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.events.PlayerLoginEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -54,7 +52,5 @@ public class Reroll {
     @EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandReroll());
-        event.registerServerCommand(new CommandRerollPlayer());
-        event.registerServerCommand(new CommandRerollAll());
     }
 }

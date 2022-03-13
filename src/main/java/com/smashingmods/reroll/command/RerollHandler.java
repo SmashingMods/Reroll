@@ -5,6 +5,7 @@ import baubles.api.inv.BaublesInventoryWrapper;
 import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.util.InventoryHandler;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -22,8 +23,8 @@ import timeisup.network.TimerPacket;
 
 public class RerollHandler {
 
-    public static void reroll(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
-        entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.DARK_AQUA)));
+    public static void reroll(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) throws CommandException {
+        entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
         resetInventory(entityPlayer);
         InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
         resetData(entityPlayer);

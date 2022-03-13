@@ -1,13 +1,11 @@
 package com.smashingmods.reroll.command;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.*;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -42,10 +40,59 @@ public class CommandReroll extends CommandBase implements ICommand  {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if (args.length == 0) {
-            reroll(server, sender, getCommandSenderAsPlayer(sender));
-        } else {
-            sender.sendMessage(new TextComponentString("commands.reroll.failure").setStyle(new Style().setColor(TextFormatting.RED)));
+
+        switch (args.length) {
+            case 0: {
+                reroll(server, sender, getCommandSenderAsPlayer(sender));
+                break;
+            }
+            case 1:
+            case 2: {
+                if (super.checkPermission(server, sender)) {
+                    switch (args[0]) {
+                        case "player": {
+                            if (args.length == 2) {
+                                try {
+                                    EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(args[1]);
+                                    sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+                                    reroll(server, sender, player);
+                                } catch (PlayerNotFoundException e) {
+                                    sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.failure", args[1]).setStyle(new Style().setColor(TextFormatting.RED)));
+                                }
+                            } else {
+                                sender.sendMessage(new TextComponentTranslation("commands.reroll.usage").setStyle(new Style().setColor(TextFormatting.RED)));
+                            }
+                            break;
+                        }
+                        case "all": {
+                            if (args.length == 1) {
+                                server.getPlayerList().getPlayers().forEach(player -> {
+                                    try {
+                                        reroll(server, sender, player);
+                                    } catch (CommandException e) {
+                                        sender.sendMessage(new TextComponentTranslation("commands.rerollall.failure").setStyle(new Style().setColor(TextFormatting.RED)));
+                                    }
+                                });
+                                sender.sendMessage(new TextComponentTranslation("commands.rerollall.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
+                            } else {
+                                sender.sendMessage(new TextComponentTranslation("commands.reroll.usage").setStyle(new Style().setColor(TextFormatting.RED)));
+                            }
+                            break;
+                        }
+                        default: {
+                            sender.sendMessage(new TextComponentTranslation("commands.reroll.usage").setStyle(new Style().setColor(TextFormatting.RED)));
+                            break;
+                        }
+                    }
+                } else {
+                    sender.sendMessage(new TextComponentTranslation("commands.reroll.permission").setStyle(new Style().setColor(TextFormatting.RED)));
+                }
+                break;
+            }
+            default: {
+                sender.sendMessage(new TextComponentTranslation("commands.reroll.usage").setStyle(new Style().setColor(TextFormatting.RED)));
+                break;
+            }
         }
     }
 
@@ -56,6 +103,15 @@ public class CommandReroll extends CommandBase implements ICommand  {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        switch (args.length) {
+            case 0: return Collections.emptyList();
+            case 1: {
+                return getListOfStringsMatchingLastWord(args, new String[]{"player", "all"});
+            }
+            case 2: {
+                return getListOfStringsMatchingLastWord(args, sender.getServer().getOnlinePlayerNames());
+            }
+        }
         return Collections.emptyList();
     }
 
