@@ -1,7 +1,11 @@
 commands.reroll.successful=Well, here we go again ... But hey, if you don't like it, you can always reroll!
-commands.reroll.usage=/reroll [player|all] <playername>
+commands.reroll.usage=/reroll [lock|unlock|player|all] <playername>
+commands.reroll.permission=You do not have permission to use this command.
+commands.reroll.locked=Player %s has reroll locked.
 commands.rerollplayer.successful=Rerolling for player %s.
-commands.rerollplayer.failure=Player %s doesn't exist.
+commands.rerollplayer.usage=/reroll player <playername>
+commands.reroll.playernotfound=Player %s doesn't exist.
 commands.rerollall.successful=All online players have been rerolled.
 commands.rerollall.failure=Something went wrong, try again.
-commands.reroll.permission=You do not have permission to use this command.
+commands.lockreroll.successful=Locked reroll command for player %s.
+commands.unlockreroll.successful=Unlocked reroll command for player %s.

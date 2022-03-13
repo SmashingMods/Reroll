@@ -1,10 +1,9 @@
-package com.smashingmods.reroll.command;
+package com.smashingmods.reroll.handler;
 
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
 import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.config.Config;
-import com.smashingmods.reroll.util.InventoryHandler;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;

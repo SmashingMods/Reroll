@@ -1,4 +1,4 @@
-package com.smashingmods.reroll.util;
+package com.smashingmods.reroll.handler;
 
 import com.smashingmods.reroll.Reroll;
 import net.minecraft.entity.player.EntityPlayer;
