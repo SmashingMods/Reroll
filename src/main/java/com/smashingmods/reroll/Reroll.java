@@ -8,6 +8,7 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -29,14 +30,19 @@ public class Reroll {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        String path = event.getModConfigurationDirectory().getPath();
         LOGGER = event.getModLog();
-        CONFIG = new Configuration(new File(event.getModConfigurationDirectory().getPath(), "reroll.cfg"));
+        CONFIG = new Configuration(new File(path, "reroll.cfg"));
         Config.readConfig();
     }
 
     @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
+    public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new PlayerLoginEvent());
+    }
+
+    @EventHandler
+    public void postInit(FMLPostInitializationEvent event) {
         MODCOMPAT_TIMEISUP = Loader.isModLoaded("timeisup");
         MODCOMPAT_BAUBLES = Loader.isModLoaded("baubles");
         MODCOMPAT_GAMESSTAGES = Loader.isModLoaded("gamestages");

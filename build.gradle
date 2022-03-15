@@ -16,7 +16,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.12.2-1.1'
+version = '1.12.2-1.2'
 group = 'com.smashingmods.reroll'
 archivesBaseName = 'reroll'
 
@@ -46,6 +46,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
     compile fg.deobf("curse.maven:timeisup-437596:3511732")
     compile fg.deobf("curse.maven:baubles-227083:2518667")
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
 }
 
 jar {
@@ -81,7 +82,7 @@ curseforge {
     apiKey = '0bf5fb4f-44a2-451e-aac4-97e39b16fcad'
     project {
         id = '592315'
-        releaseType = 'release'
+        releaseType = 'alpha'
         changelogType = 'markdown'
         changelog = file("changelog.md")
         addGameVersion 'Forge'
