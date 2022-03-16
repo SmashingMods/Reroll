@@ -2,6 +2,7 @@ commands.reroll.successful=Well, here we go again ... But hey, if you don't like
 commands.reroll.usage=/reroll [lock|unlock|player|all] <playername>
 commands.reroll.permission=You do not have permission to use this command.
 commands.reroll.locked=Player %s has reroll locked.
+commands.reroll.server=The server can't be rerolled.
 commands.rerollplayer.successful=Rerolling for player %s.
 commands.rerollplayer.usage=/reroll player <playername>
 commands.reroll.playernotfound=Player %s doesn't exist.

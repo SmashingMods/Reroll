@@ -2,11 +2,11 @@ package com.smashingmods.reroll.handler;
 
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.config.Config;
-import com.smashingmods.reroll.util.JsonWriter;
+import com.smashingmods.reroll.model.RerollObject;
+import com.smashingmods.reroll.model.SpiralObject;
+import com.smashingmods.reroll.util.JsonMapper;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -22,42 +22,40 @@ import timeisup.capabilities.TimerCapability;
 import timeisup.network.PacketHandler;
 import timeisup.network.TimerPacket;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RerollHandler {
 
-    public static Spiral SPIRAL;
+    private static String PATH;
+    private static final String SEPARATOR = System.getProperty("file.separator");
+    private static RerollObject CURRENT;
+    private static SpiralObject SPIRAL;
 
-    public static void reroll(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) throws CommandException {
+    public static void reroll(MinecraftServer server, EntityPlayerMP entityPlayer) throws CommandException {
 
-        if (SPIRAL == null) {
-            SPIRAL = new Spiral();
-
-            JsonWriter writer = null;
-            try {
-                writer = new JsonWriter(server.getDataDirectory().getCanonicalPath() + System.getProperty("file.separator") + "saves" + System.getProperty("file.separator") + server.getWorldName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Rerolls current = writer.readJson("reroll_step.json", Rerolls.class);
-
-            if (current == null) {
-                current = new Rerolls();
-            }
-
-            if (current.containsDimension(entityPlayer.dimension)) {
-                current.incrementStep(entityPlayer.dimension);
+        try {
+            if (server.isDedicatedServer()) {
+                PATH = server.getDataDirectory().getCanonicalPath() + SEPARATOR + server.getFolderName();
             } else {
-                current.addDimension(entityPlayer.dimension);
+                PATH = server.getDataDirectory().getCanonicalPath() + SEPARATOR + "saves" + SEPARATOR + server.getWorldName();
             }
-            writer.writeJson("reroll_step.json", current);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            for (int i = 0; i < current.getDimensionByID(entityPlayer.dimension).getStep(); i++) {
-                SPIRAL.next();
-            }
+        Reroll.MAPPER.setFile(new File(PATH, "reroll_step.json"));
+        CURRENT = Reroll.MAPPER.readFile(RerollObject.class);
+
+        if (CURRENT == null) {
+            CURRENT = new RerollObject();
+        }
+
+        if (CURRENT.containsDimension(entityPlayer.dimension)) {
+            CURRENT.incrementStep(entityPlayer.dimension);
+            SPIRAL = CURRENT.getDimensionObjectByID(entityPlayer.dimension).getSpiral();
+        } else {
+            CURRENT.addDimension(entityPlayer.dimension);
         }
 
         resetInventory(entityPlayer);
@@ -65,11 +63,12 @@ public class RerollHandler {
         resetData(entityPlayer);
         server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", entityPlayer.getName()));
         resetModData(server, entityPlayer);
-        resetLocation(server, sender, entityPlayer);
+        resetLocation(server, entityPlayer);
         entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
     }
 
     public static void resetInventory(EntityPlayerMP entityPlayer) {
+
         entityPlayer.closeContainer();
         entityPlayer.inventory.mainInventory.clear();
         entityPlayer.inventory.armorInventory.clear();
@@ -127,9 +126,10 @@ public class RerollHandler {
         }
     }
 
-    public static void resetLocation(MinecraftServer server, ICommandSender sender, EntityPlayerMP entityPlayer) {
+    public static void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer) {
+
         BlockPos blockPos = generateValidBlockPos(entityPlayer);
-        server.getCommandManager().executeCommand(server, String.format("/tp %s %d %d %d", sender.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+        server.getCommandManager().executeCommand(server, String.format("/tp %s %d %d %d", entityPlayer.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
         entityPlayer.setSpawnDimension(Config.useCurrentDim ? entityPlayer.dimension : Config.overrideDim);
         entityPlayer.setSpawnPoint(blockPos, true);
         entityPlayer.bedLocation = blockPos;
@@ -137,10 +137,12 @@ public class RerollHandler {
 
     public static BlockPos generateValidBlockPos(EntityPlayerMP entityPlayer) {
 
-        int[] spiralPos = SPIRAL.next();
+        SPIRAL = CURRENT.getDimensionObjectByID(entityPlayer.dimension).getSpiral();
+        int[] data = SPIRAL.next();
+        CURRENT.getDimensionObjectByID(entityPlayer.dimension).setSpiral(new SpiralObject(data[0], data[1], data[2], data[3]));
+        Reroll.MAPPER.writeFile(CURRENT);
 
-        BlockPos newPosition = new BlockPos(spiralPos[0] * Config.minDistance, 0, spiralPos[1] * Config.minDistance);
-
+        BlockPos newPosition = new BlockPos(data[0] * Config.minDistance, 0, data[1] * Config.minDistance);
         double posX = newPosition.getX();
         double posZ = newPosition.getZ();
         World world = entityPlayer.getEntityWorld();
@@ -165,84 +167,5 @@ public class RerollHandler {
             }
         }
         return toReturn;
-    }
-
-    private static class Spiral {
-        private int posX = 0;
-        private int posZ = 0;
-        private int deltaX = 0;
-        private int deltaZ = -1;
-
-        int[] next() {
-            if (posX == posZ || posX < 0 && posX == -posZ || posX > 0 && posX == 1 - posZ) {
-                int t = deltaX;
-                deltaX = -deltaZ;
-                deltaZ = t;
-            }
-            posX += deltaX;
-            posZ += deltaZ;
-            return new int[] {posX, posZ};
-        }
-    }
-
-    public static class Rerolls {
-        public List<Dimension> dimensionList;
-
-        public Rerolls() {
-            dimensionList = new ArrayList<>();
-            dimensionList.add(new Dimension(1));
-            dimensionList.add(new Dimension(-1));
-        }
-
-        public void addDimension(int id) {
-            dimensionList.add(new Dimension(id));
-            incrementStep(id);
-        }
-
-        public void incrementStep(int id) {
-            getDimensionByID(id).incrementStep();
-        }
-
-        public Dimension getDimensionByID(int id) {
-            for (Dimension dimension : dimensionList) {
-                if (dimension.getId() == id) {
-                    return dimension;
-                }
-            }
-            return null;
-        }
-
-        public boolean containsDimension(int id) {
-            if (getDimensionByID(id) != null) {
-                return true;
-            }
-            return false;
-        }
-    }
-
-    public static class Dimension {
-        public final int id;
-        public int step = 0;
-
-        @JsonCreator
-        public Dimension(@JsonProperty("id") int id) {
-            this.id = id;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public int getStep() {
-            return step;
-        }
-
-        public void setStep(int step) {
-            this.step = step;
-        }
-
-        public void incrementStep() {
-            step++;
-        }
     }
 }

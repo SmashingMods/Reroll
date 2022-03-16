@@ -7,19 +7,18 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
     }
 }
-
 plugins {
     id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'java'
 }
-        
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
-version = '1.12.2-1.2'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'maven-publish'
+apply plugin: 'java'
+
+version = '1.12.2-1.3'
 group = 'com.smashingmods.reroll'
 archivesBaseName = 'reroll'
-
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
@@ -46,7 +45,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
     compile fg.deobf("curse.maven:timeisup-437596:3511732")
     compile fg.deobf("curse.maven:baubles-227083:2518667")
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
 }
 
 jar {
@@ -61,6 +60,19 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll {it.name.contains("jackson")}.collect { zipTree(it)}
+    }
+}
+
+task copyLibs(type: Copy) {
+    from configurations.compile
+    into 'libraries'
+    include "jackson-annotations-2.13.2.jar"
+    include "jackson-core-2.13.2.jar"
+    include "jackson-databind-2.13.2.jar"
 }
 
 jar.finalizedBy('reobfJar')
@@ -82,7 +94,7 @@ curseforge {
     apiKey = '0bf5fb4f-44a2-451e-aac4-97e39b16fcad'
     project {
         id = '592315'
-        releaseType = 'alpha'
+        releaseType = 'release'
         changelogType = 'markdown'
         changelog = file("changelog.md")
         addGameVersion 'Forge'

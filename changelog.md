@@ -1,6 +1,3 @@
 # Changes
-- Added new functionality to distribute the player on a spiral.
-- Persist spiral step into json file in world folder.
-
-# Important
-- Probably doesn't work on servers just yet. It might, but I haven't tested it.
+- Refactor spiral functionality to make it more robust, functional on client and server, and mostly(?) error proof.
+- Add dependencies to jar. They were missing before causing the previous build to be completely non-functional.

@@ -3,6 +3,7 @@ package com.smashingmods.reroll;
 import com.smashingmods.reroll.command.CommandReroll;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.events.PlayerLoginEvent;
+import com.smashingmods.reroll.util.JsonMapper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
@@ -21,6 +22,7 @@ public class Reroll {
     public static final String MODID = "reroll";
     public static Configuration CONFIG;
     public static Logger LOGGER;
+    public static JsonMapper MAPPER = new JsonMapper();
 
     // Mod Compatibility
     public static boolean MODCOMPAT_TIMEISUP;
