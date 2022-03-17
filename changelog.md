@@ -1,3 +1,3 @@
 # Changes
-- Refactor spiral functionality to make it more robust, functional on client and server, and mostly(?) error proof.
-- Add dependencies to jar. They were missing before causing the previous build to be completely non-functional.
+- Add new feature: Reroll All Together! New config option to make sure all players go to the same location if you use '/reroll all'.
+- Clean up code a bit removing redundancies that comes with quick prototyping.
