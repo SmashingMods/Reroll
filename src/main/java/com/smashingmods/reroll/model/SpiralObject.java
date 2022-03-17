@@ -1,5 +1,7 @@
 package com.smashingmods.reroll.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class SpiralObject {
     private int posX = 0;
     private int posZ = 0;
@@ -7,6 +9,13 @@ public class SpiralObject {
     private int deltaZ = -1;
 
     public SpiralObject() {}
+
+    public SpiralObject(int[] data) {
+        this.posX = data[0];
+        this.posZ = data[1];
+        this.deltaX = data[2];
+        this.deltaZ = data[3];
+    }
 
     public SpiralObject(int posX, int posZ, int deltaX, int deltaZ) {
         this.posX = posX;
@@ -58,10 +67,27 @@ public class SpiralObject {
         this.deltaZ = deltaZ;
     }
 
+    @JsonIgnore
+    public int[] getSpiralAsIntArray() {
+        return new int[] { posX, posZ, deltaX, deltaZ };
+    }
+
+    @JsonIgnore
+    public SpiralObject getSpiral() {
+        return this;
+    }
+
     public void setSpiral(SpiralObject spiral) {
         this.posX = spiral.getPosX();
         this.posZ = spiral.getPosZ();
         this.deltaX = spiral.getDeltaX();
         this.deltaZ = spiral.getDeltaZ();
+    }
+
+    public void setSpiral(int[] data) {
+        this.posX = data[0];
+        this.posZ = data[1];
+        this.deltaX = data[2];
+        this.deltaZ = data[3];
     }
 }

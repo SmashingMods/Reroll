@@ -1,5 +1,7 @@
 package com.smashingmods.reroll.command;
 
+import com.smashingmods.reroll.config.Config;
+import com.smashingmods.reroll.handler.RerollHandler;
 import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -14,12 +16,14 @@ import java.util.*;
 import java.util.List;
 
 import static com.smashingmods.reroll.handler.LockHandler.*;
-import static com.smashingmods.reroll.handler.RerollHandler.reroll;
 import static com.smashingmods.reroll.util.TagUtil.getTag;
 
 public class CommandReroll extends CommandBase implements ICommand  {
 
+    private RerollHandler handler;
+
     public CommandReroll() {
+        this.handler = new RerollHandler();
     }
 
     @Override
@@ -45,7 +49,7 @@ public class CommandReroll extends CommandBase implements ICommand  {
                     if (getTag(getCommandSenderAsPlayer(sender)).getBoolean(REROLL_LOCKED)) {
                         sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", getCommandSenderAsPlayer(sender).getName()).setStyle(new Style().setColor(TextFormatting.RED)));
                     } else {
-                        reroll(server, getCommandSenderAsPlayer(sender));
+                        handler.reroll(server, getCommandSenderAsPlayer(sender), true);
                     }
                 } else {
                     sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
@@ -101,7 +105,7 @@ public class CommandReroll extends CommandBase implements ICommand  {
                                         if (getTag(player).getBoolean(REROLL_LOCKED)) {
                                             sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
                                         } else {
-                                            reroll(server, player);
+                                            handler.reroll(server, player, true);
                                             sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
                                         }
                                     } else {
@@ -122,12 +126,13 @@ public class CommandReroll extends CommandBase implements ICommand  {
                                         if (getTag(player).getBoolean(REROLL_LOCKED)) {
                                             sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
                                         } else {
-                                            reroll(server, player);
+                                            handler.reroll(server, player, !Config.rerollAllTogether);
                                         }
                                     } catch (CommandException e) {
                                         sender.sendMessage(new TextComponentTranslation("commands.rerollall.failure").setStyle(new Style().setColor(TextFormatting.RED)));
                                     }
                                 });
+                                if (Config.rerollAllTogether) handler.next();
                                 sender.sendMessage(new TextComponentTranslation("commands.rerollall.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
                             } else {
                                 sender.sendMessage(new TextComponentTranslation("commands.reroll.usage").setStyle(new Style().setColor(TextFormatting.RED)));
@@ -161,7 +166,7 @@ public class CommandReroll extends CommandBase implements ICommand  {
         switch (args.length) {
             case 0: return Collections.emptyList();
             case 1: {
-                return getListOfStringsMatchingLastWord(args, new String[]{"lock", "unlock", "player", "all"});
+                return getListOfStringsMatchingLastWord(args, "lock", "unlock", "player", "all");
             }
             case 2: {
                 return getListOfStringsMatchingLastWord(args, sender.getServer().getOnlinePlayerNames());
