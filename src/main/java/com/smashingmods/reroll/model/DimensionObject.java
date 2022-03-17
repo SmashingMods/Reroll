@@ -9,7 +9,6 @@ public class DimensionObject {
 
     @JsonProperty("id")
     private final int id;
-    private int step = 0;
     private SpiralObject spiral;
 
     @JsonCreator
@@ -20,18 +19,6 @@ public class DimensionObject {
 
     public int getId() {
         return id;
-    }
-
-    public int getStep() {
-        return step;
-    }
-
-    public void setStep(int step) {
-        this.step = step;
-    }
-
-    public void incrementStep() {
-        step++;
     }
 
     public void setSpiral(SpiralObject spiral) {

@@ -52,7 +52,6 @@ public class RerollHandler {
         }
 
         if (CURRENT.containsDimension(entityPlayer.dimension)) {
-            CURRENT.incrementStep(entityPlayer.dimension);
             SPIRAL = CURRENT.getDimensionObjectByID(entityPlayer.dimension).getSpiral();
         } else {
             CURRENT.addDimension(entityPlayer.dimension);

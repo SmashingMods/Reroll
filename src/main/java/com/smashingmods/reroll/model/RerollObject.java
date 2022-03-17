@@ -15,11 +15,6 @@ public class RerollObject {
 
     public void addDimension(int id) {
         dimensionList.add(new DimensionObject(id));
-        incrementStep(id);
-    }
-
-    public void incrementStep(int id) {
-        getDimensionObjectByID(id).incrementStep();
     }
 
     public DimensionObject getDimensionObjectByID(int id) {
