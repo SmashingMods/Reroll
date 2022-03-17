@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(modid = Reroll.MODID, version = "1.12.2-1.3.1", useMetadata = true)
+@Mod(modid = Reroll.MODID, version = "1.12.2-1.3.2", useMetadata = true)
 public class Reroll {
     public static final String MODID = "reroll";
     public static Configuration CONFIG;

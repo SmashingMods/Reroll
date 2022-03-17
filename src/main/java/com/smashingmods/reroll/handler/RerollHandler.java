@@ -1,5 +1,7 @@
 package com.smashingmods.reroll.handler;
 
+import arekkuusu.enderskills.api.capability.AdvancementCapability;
+import arekkuusu.enderskills.api.capability.Capabilities;
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
 import com.smashingmods.reroll.Reroll;
@@ -111,9 +113,14 @@ public class RerollHandler {
         }
 
         if (Reroll.MODCOMPAT_ENDERSKILLS) {
+            AdvancementCapability esadvancements = entityPlayer.getCapability(Capabilities.ADVANCEMENT, null);
+            esadvancements.consumeExperienceFromTotal(entityPlayer, Integer.MAX_VALUE);
+
             server.getCommandManager().executeCommand(server, String.format("/es_advancement %s retries set 0", entityPlayer.getName()));
             server.getCommandManager().executeCommand(server, String.format("/es_advancement %s level set 1", entityPlayer.getName()));
             server.getCommandManager().executeCommand(server, String.format("/es_skill %s reset", entityPlayer.getName()));
+            server.getCommandManager().executeCommand(server, String.format("/es_cooldown %s reset", entityPlayer.getName()));
+            server.getCommandManager().executeCommand(server, String.format("/es_endurance %s reset", entityPlayer.getName()));
         }
     }
 
