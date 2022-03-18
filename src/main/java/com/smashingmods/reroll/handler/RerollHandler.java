@@ -9,13 +9,19 @@ import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.model.RerollObject;
 import com.smashingmods.reroll.model.SpiralObject;
 import net.minecraft.command.CommandException;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.server.command.CommandSetDimension;
 import timeisup.TimeIsUp;
 import timeisup.capabilities.Timer;
 import timeisup.capabilities.TimerCapability;
@@ -23,6 +29,7 @@ import timeisup.network.PacketHandler;
 import timeisup.network.TimerPacket;
 
 import java.io.File;
+import java.util.*;
 
 public class RerollHandler {
 
@@ -32,7 +39,7 @@ public class RerollHandler {
 
     public RerollHandler() {}
 
-    public void reroll(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) throws CommandException {
+    public void reroll(MinecraftServer server, EntityPlayer entityPlayer, boolean next) {
         String PATH;
 
         if (server.isDedicatedServer()) {
@@ -52,25 +59,73 @@ public class RerollHandler {
         }
 
         resetInventory(entityPlayer);
-        InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
         resetData(entityPlayer);
         server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", entityPlayer.getName()));
         resetModData(server, entityPlayer);
         resetLocation(server, entityPlayer, next);
+        if (Config.setNewInventory) {
+            InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
+        }
         entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
     }
 
-    public void resetInventory(EntityPlayerMP entityPlayer) {
+    public List<BlockPos> generateValidChestPosition(World world, BlockPos position) {
 
-        entityPlayer.closeContainer();
-        entityPlayer.inventory.mainInventory.clear();
-        entityPlayer.inventory.armorInventory.clear();
-        entityPlayer.inventory.offHandInventory.clear();
-        entityPlayer.getInventoryEnderChest().clear();
+        List<BlockPos> directions = new ArrayList<>();
+        directions.add(position.north());
+        directions.add(position.east());
+        directions.add(position.south());
+        directions.add(position.west());
+        directions.add(position.up());
+        directions.add(position.down());
+
+        if (world.getBlockState(position).getMaterial().isReplaceable()) {
+            List<BlockPos> positionList = new ArrayList<>();
+            for (BlockPos direction : directions) {
+                if (world.getBlockState(direction).getMaterial().isReplaceable()) {
+                    positionList.add(position);
+                    positionList.add(direction);
+                    break;
+                }
+            }
+            return positionList;
+        } else {
+            List<BlockPos> positionList = new ArrayList<>();
+            directions.forEach(direction -> {
+                positionList.addAll(generateValidChestPosition(world, direction));
+            });
+            return positionList;
+        }
+    }
+
+    public void resetInventory(EntityPlayer entityPlayer) {
+
+        if (Config.sendInventoryToChest && !entityPlayer.inventory.isEmpty()) {
+            World world = entityPlayer.getEntityWorld();
+            BlockPos position = entityPlayer.getPosition();
+            List<BlockPos> chestPositions = generateValidChestPosition(world, position);
+            final int[] count = {0};
+            chestPositions.forEach(pos -> {
+                world.setBlockState(pos, Blocks.CHEST.getDefaultState());
+                for (int slot = 0; slot < 27; slot++) {
+                    IItemHandler capability = world.getTileEntity(pos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN);
+                    capability.insertItem(slot, entityPlayer.inventory.getStackInSlot(count[0]), false);
+                    entityPlayer.inventory.removeStackFromSlot(count[0]);
+                    count[0]++;
+                }
+            });
+        } else {
+            entityPlayer.inventory.mainInventory.clear();
+            entityPlayer.inventory.armorInventory.clear();
+            entityPlayer.inventory.offHandInventory.clear();
+        }
+
+        entityPlayer.closeScreen();
+        if (Config.resetEnderChest) entityPlayer.getInventoryEnderChest().clear();
         entityPlayer.inventory.dropAllItems();
     }
 
-    public void resetData(EntityPlayerMP entityPlayer) {
+    public void resetData(EntityPlayer entityPlayer) {
 
         entityPlayer.setHealth(20);
         entityPlayer.setAir(300);
@@ -90,7 +145,7 @@ public class RerollHandler {
         entityPlayer.dismountRidingEntity();
     }
 
-    public void resetModData(MinecraftServer server, EntityPlayerMP entityPlayer) {
+    public void resetModData(MinecraftServer server, EntityPlayer entityPlayer) {
         if (Reroll.MODCOMPAT_TIMEISUP) {
             TimerCapability timer = entityPlayer.getCapability(TimeIsUp.TIMER, null);
 
@@ -98,7 +153,7 @@ public class RerollHandler {
                 Timer dimTimer = timer.getOrCreate(entityPlayer.getEntityWorld());
                 if (dimTimer != null) {
                     dimTimer.setDuration(Config.timeisupTimer);
-                    PacketHandler.INSTANCE.sendTo(new TimerPacket(Config.timeisupTimer), entityPlayer);
+                    PacketHandler.INSTANCE.sendTo(new TimerPacket(Config.timeisupTimer), (EntityPlayerMP) entityPlayer);
                 }
             }
         }
@@ -124,16 +179,30 @@ public class RerollHandler {
         }
     }
 
-    public void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
-
-        BlockPos blockPos = generateValidBlockPos(entityPlayer, next);
-        server.getCommandManager().executeCommand(server, String.format("/tp %s %d %d %d", entityPlayer.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-        entityPlayer.setSpawnDimension(Config.useCurrentDim ? entityPlayer.dimension : Config.overrideDim);
-        entityPlayer.setSpawnPoint(blockPos, true);
-        entityPlayer.bedLocation = blockPos;
+    public void resetLocation(MinecraftServer server, EntityPlayer entityPlayer, boolean next) {
+        if (!Config.useCurrentDim) {
+            CommandSetDimension setDimension = new CommandSetDimension();
+            try {
+                if (entityPlayer.dimension != Config.overrideDim) {
+                    setDimension.execute(server, entityPlayer, new String[] { entityPlayer.getName(), String.valueOf(Config.overrideDim), String.valueOf(0), String.valueOf(75), String.valueOf(0)});
+                }
+                executeTeleport(server, entityPlayer, generateValidBlockPos(entityPlayer, next));
+                entityPlayer.setSpawnDimension(Config.overrideDim);
+            } catch (CommandException e) {
+                e.printStackTrace();
+            }
+        } else {
+            executeTeleport(server, entityPlayer, generateValidBlockPos(entityPlayer, next));
+            entityPlayer.setSpawnDimension(entityPlayer.dimension);
+        }
     }
 
-    public BlockPos generateValidBlockPos(EntityPlayerMP entityPlayer, boolean next) {
+    public void executeTeleport(MinecraftServer server, EntityPlayer entityPlayer, BlockPos blockPos) {
+        server.getCommandManager().executeCommand(server, String.format("/tp %s %d %d %d", entityPlayer.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+        entityPlayer.setSpawnPoint(blockPos, true);
+    }
+
+    public BlockPos generateValidBlockPos(EntityPlayer entityPlayer, boolean next) {
 
         SPIRAL = CURRENT.getDimensionObjectByID(entityPlayer.dimension).getSpiral();
 
@@ -142,9 +211,12 @@ public class RerollHandler {
         double posX = SPIRAL.getPosX() * Config.minDistance;
         double posZ = SPIRAL.getPosZ() * Config.minDistance;
         World world = entityPlayer.getEntityWorld();
+        int height = world.getActualHeight();
         BlockPos toReturn = new BlockPos(entityPlayer);
 
-        for (int i = 2; i < entityPlayer.getEntityWorld().getActualHeight(); i++) {
+        boolean found = false;
+
+        for (int i = 2; i < height; i++) {
             BlockPos topBlock = new BlockPos(posX, i, posZ);
             if (
                 (world.canBlockSeeSky(topBlock) && world.canBlockSeeSky(topBlock.down(1))) &&
@@ -153,17 +225,22 @@ public class RerollHandler {
                 world.getBlockState(topBlock.down(2)).getMaterial().isSolid() &&
                 !world.getBlockState(topBlock.down(2)).getMaterial().isLiquid()
             ) {
+                found = true;
                 toReturn = new BlockPos(posX, i, posZ);
                 break;
             } else {
-                if (i == 255) {
+                if (i == height) {
                     SPIRAL.setSpiral(SPIRAL.next());
-                    toReturn = generateValidBlockPos(entityPlayer, next);
                 }
             }
         }
         Reroll.MAPPER.writeFile(CURRENT);
-        return toReturn;
+
+        if (found) {
+            return toReturn;
+        } else {
+            return generateValidBlockPos(entityPlayer, next);
+        }
     }
 
     public void next() {

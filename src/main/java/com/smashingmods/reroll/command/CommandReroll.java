@@ -99,19 +99,15 @@ public class CommandReroll extends CommandBase implements ICommand  {
                         }
                         case "player": {
                             if (args.length == 2) {
-                                try {
-                                    EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(args[1]);
-                                    if (player != null) {
-                                        if (getTag(player).getBoolean(REROLL_LOCKED)) {
-                                            sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
-                                        } else {
-                                            handler.reroll(server, player, true);
-                                            sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                                        }
+                                EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(args[1]);
+                                if (player != null) {
+                                    if (getTag(player).getBoolean(REROLL_LOCKED)) {
+                                        sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
                                     } else {
-                                        sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", args[1]).setStyle(new Style().setColor(TextFormatting.RED)));
+                                        handler.reroll(server, player, true);
+                                        sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
                                     }
-                                } catch (PlayerNotFoundException e) {
+                                } else {
                                     sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", args[1]).setStyle(new Style().setColor(TextFormatting.RED)));
                                 }
                             } else {
@@ -122,14 +118,10 @@ public class CommandReroll extends CommandBase implements ICommand  {
                         case "all": {
                             if (args.length == 1) {
                                 server.getPlayerList().getPlayers().forEach(player -> {
-                                    try {
-                                        if (getTag(player).getBoolean(REROLL_LOCKED)) {
-                                            sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
-                                        } else {
-                                            handler.reroll(server, player, !Config.rerollAllTogether);
-                                        }
-                                    } catch (CommandException e) {
-                                        sender.sendMessage(new TextComponentTranslation("commands.rerollall.failure").setStyle(new Style().setColor(TextFormatting.RED)));
+                                    if (getTag(player).getBoolean(REROLL_LOCKED)) {
+                                        sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
+                                    } else {
+                                        handler.reroll(server, player, !Config.rerollAllTogether);
                                     }
                                 });
                                 if (Config.rerollAllTogether) handler.next();

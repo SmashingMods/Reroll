@@ -9,7 +9,8 @@ import static com.smashingmods.reroll.util.TagUtil.getTag;
 
 public class LockHandler {
 
-    public static String REROLL_LOCKED = Reroll.MODID + "_reroll_locked";
+    public static String REROLL_LOCKED = Reroll.MODID + "_locked";
+    public static String USER_UNLOCKED = Reroll.MODID + "_user_unlocked";
 
     public static void lockReroll(EntityPlayer entityPlayer) throws PlayerNotFoundException {
         NBTTagCompound tag = getTag(entityPlayer);
@@ -24,6 +25,7 @@ public class LockHandler {
         NBTTagCompound tag = getTag(entityPlayer);
 
         tag.setBoolean(REROLL_LOCKED, false);
+        if (!tag.getBoolean(USER_UNLOCKED)) tag.setBoolean(USER_UNLOCKED, true);
         entityPlayer.getEntityData().setTag(EntityPlayer.PERSISTED_NBT_TAG, tag);
     }
 }

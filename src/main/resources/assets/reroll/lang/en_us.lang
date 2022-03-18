@@ -1,8 +1,9 @@
 commands.reroll.successful=Well, here we go again ... But hey, if you don't like it, you can always reroll!
 commands.reroll.usage=/reroll [lock|unlock|player|all] <playername>
 commands.reroll.permission=You do not have permission to use this command.
-commands.reroll.locked=Player %s has reroll locked.
+commands.reroll.locked=Player %s has reroll locked. Use '/reroll unlock' to unlock yourself.
 commands.reroll.server=The server can't be rerolled.
+commands.reroll.cooldown=You have to wait %d seconds to use reroll again.
 commands.rerollplayer.successful=Rerolling for player %s.
 commands.rerollplayer.usage=/reroll player <playername>
 commands.reroll.playernotfound=Player %s doesn't exist.
@@ -10,3 +11,4 @@ commands.rerollall.successful=All online players have been rerolled.
 commands.rerollall.failure=Something went wrong, try again.
 commands.lockreroll.successful=Locked reroll command for player %s.
 commands.unlockreroll.successful=Unlocked reroll command for player %s.
+item.reroll.reroll_dice.name=Reroll Dice

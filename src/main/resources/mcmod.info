@@ -3,7 +3,7 @@
   "modid": "reroll",
   "name": "Reroll",
   "description": "Reroll is a mod designed to completely reroll or reset a player. It will remove their inventory, achievements, etc. and teleport them far away to simulate a completely new world. This is great for hardcore style modpacks that don't want to create new worlds for every reset. It works in single player and on servers.",
-  "version": "1.12.2-1.3.2",
+  "version": "1.12.2-1.4.0",
   "mcversion": "1.12.2",
   "url": "",
   "updateUrl": "",

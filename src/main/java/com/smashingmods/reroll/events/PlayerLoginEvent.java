@@ -8,6 +8,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
+import static com.smashingmods.reroll.handler.LockHandler.REROLL_LOCKED;
+import static com.smashingmods.reroll.handler.LockHandler.USER_UNLOCKED;
 import static com.smashingmods.reroll.util.TagUtil.getTag;
 
 public class PlayerLoginEvent {
@@ -22,6 +24,10 @@ public class PlayerLoginEvent {
 
         if (!tag.getBoolean(REROLL_ITEMS)) {
             InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
+        }
+
+        if (Config.startLocked) {
+            if (!tag.getBoolean(USER_UNLOCKED)) tag.setBoolean(REROLL_LOCKED, true);
         }
 
         tag.setBoolean(REROLL_ITEMS, true);
