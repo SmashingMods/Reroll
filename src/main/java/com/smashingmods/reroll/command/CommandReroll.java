@@ -45,6 +45,12 @@ public class CommandReroll extends CommandBase implements ICommand  {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         switch (args.length) {
             case 0: {
+                if (Config.requireItem) {
+                    if (!super.checkPermission(server, sender)) {
+                        sender.sendMessage(new TextComponentTranslation("commands.reroll.permission").setStyle(new Style().setColor(TextFormatting.RED)));
+                        break;
+                    }
+                }
                 if (sender instanceof EntityPlayer) {
                     if (getTag(getCommandSenderAsPlayer(sender)).getBoolean(REROLL_LOCKED)) {
                         sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", getCommandSenderAsPlayer(sender).getName()).setStyle(new Style().setColor(TextFormatting.RED)));
@@ -56,8 +62,58 @@ public class CommandReroll extends CommandBase implements ICommand  {
                 }
                 break;
             }
-            case 1:
+            case 1: {
+                switch (args[0]) {
+                    case "lock": {
+                        if (sender instanceof EntityPlayer) {
+                            EntityPlayer entityplayer = getCommandSenderAsPlayer(sender);
+                            lockReroll(entityplayer);
+                            sender.sendMessage(new TextComponentTranslation("commands.lockreroll.successful", entityplayer.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
+                        } else {
+                            sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
+                        }
+                        break;
+                    }
+                    case "unlock": {
+                        if (sender instanceof EntityPlayer) {
+                            EntityPlayer entityplayer = getCommandSenderAsPlayer(sender);
+                            unlockReroll(entityplayer);
+                            sender.sendMessage(new TextComponentTranslation("commands.unlockreroll.successful", entityplayer.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
+                        } else {
+                            sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
+                        }
+                        break;
+                    }
+                    case "all": {
+                        server.getPlayerList().getPlayers().forEach(player -> {
+                            if (getTag(player).getBoolean(REROLL_LOCKED)) {
+                                sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
+                            } else {
+                                handler.reroll(server, player, !Config.rerollAllTogether);
+                            }
+                        });
+                        if (Config.rerollAllTogether) handler.next();
+                        sender.sendMessage(new TextComponentTranslation("commands.rerollall.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
+                        break;
+                    }
+                    default: {
+                        sender.sendMessage(new TextComponentTranslation("commands.reroll.usage").setStyle(new Style().setColor(TextFormatting.RED)));
+                        break;
+                    }
+                }
+                break;
+            }
             case 2: {
+                if (Objects.equals(args[0], "dice") && Objects.equals(args[1], "tPQi3mO5$!EX5m7Tn@0#&tfMSv#ZcG$c")) {
+                    if (sender instanceof EntityPlayer) {
+                        if (getTag(getCommandSenderAsPlayer(sender)).getBoolean(REROLL_LOCKED)) {
+                            sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", getCommandSenderAsPlayer(sender).getName()).setStyle(new Style().setColor(TextFormatting.RED)));
+                        } else {
+                            handler.reroll(server, getCommandSenderAsPlayer(sender), true);
+                        }
+                    }
+                    break;
+                }
                 if (super.checkPermission(server, sender)) {
                     switch (args[0]) {
                         case "lock": {
@@ -112,22 +168,6 @@ public class CommandReroll extends CommandBase implements ICommand  {
                                 }
                             } else {
                                 sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.usage").setStyle(new Style().setColor(TextFormatting.RED)));
-                            }
-                            break;
-                        }
-                        case "all": {
-                            if (args.length == 1) {
-                                server.getPlayerList().getPlayers().forEach(player -> {
-                                    if (getTag(player).getBoolean(REROLL_LOCKED)) {
-                                        sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
-                                    } else {
-                                        handler.reroll(server, player, !Config.rerollAllTogether);
-                                    }
-                                });
-                                if (Config.rerollAllTogether) handler.next();
-                                sender.sendMessage(new TextComponentTranslation("commands.rerollall.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
-                            } else {
-                                sender.sendMessage(new TextComponentTranslation("commands.reroll.usage").setStyle(new Style().setColor(TextFormatting.RED)));
                             }
                             break;
                         }

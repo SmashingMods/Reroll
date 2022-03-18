@@ -16,7 +16,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 apply plugin: 'java'
 
-version = '1.12.2-1.4.0'
+version = '1.12.2-1.4.1'
 group = 'com.smashingmods.reroll'
 archivesBaseName = 'reroll'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'

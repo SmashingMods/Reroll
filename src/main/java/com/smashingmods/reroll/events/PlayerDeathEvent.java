@@ -1,8 +1,13 @@
 package com.smashingmods.reroll.events;
 
-import com.smashingmods.reroll.handler.RerollHandler;
+import com.smashingmods.reroll.config.Config;
+import com.smashingmods.reroll.handler.LockHandler;
+import com.smashingmods.reroll.util.TagUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.command.ICommandManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -10,14 +15,19 @@ public class PlayerDeathEvent {
 
     @SubscribeEvent
     public void playerDeath(LivingDamageEvent event) {
-        RerollHandler handler = new RerollHandler();
         Entity entity = event.getEntity();
+        MinecraftServer server = Minecraft.getMinecraft().getIntegratedServer();
+        ICommandManager manager = server.getCommandManager();
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityPlayer = (EntityPlayer) entity;
-            if (true) {
+            String playerName = entityPlayer.getName();
+            if (Config.rerollOnDeath) {
                 if (event.getAmount() > entityPlayer.getHealth()) {
                     event.setCanceled(true);
-                    handler.reroll(entityPlayer.getServer(), entityPlayer, true);
+                    boolean wasLocked = TagUtil.getTag(entityPlayer).getBoolean(LockHandler.REROLL_LOCKED);
+                    if (wasLocked) manager.executeCommand(server, String.format("/reroll unlock %s", playerName));
+                    manager.executeCommand(server, String.format("/reroll player %s", entityPlayer.getName()));
+                    if (wasLocked) manager.executeCommand(server, String.format("/reroll lock %s", playerName));
                 }
             }
         }

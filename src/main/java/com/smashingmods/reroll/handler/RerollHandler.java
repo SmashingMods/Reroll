@@ -59,13 +59,13 @@ public class RerollHandler {
         }
 
         resetInventory(entityPlayer);
-        resetData(entityPlayer);
         server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", entityPlayer.getName()));
-        resetModData(server, entityPlayer);
         resetLocation(server, entityPlayer, next);
         if (Config.setNewInventory) {
             InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
         }
+        resetData(entityPlayer);
+        resetModData(server, entityPlayer);
         entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
     }
 
@@ -127,12 +127,12 @@ public class RerollHandler {
 
     public void resetData(EntityPlayer entityPlayer) {
 
-        entityPlayer.setHealth(20);
+        entityPlayer.setFire(0);
+        entityPlayer.extinguish();
+        entityPlayer.setHealth(entityPlayer.getMaxHealth());
         entityPlayer.setAir(300);
         entityPlayer.getFoodStats().setFoodLevel(20);
         entityPlayer.addExperienceLevel(-Integer.MAX_VALUE);
-        entityPlayer.setFire(0);
-        entityPlayer.extinguish();
         entityPlayer.setAbsorptionAmount(0.0f);
         entityPlayer.clearActivePotions();
         entityPlayer.setArrowCountInEntity(0);
@@ -223,10 +223,11 @@ public class RerollHandler {
                 (world.isAirBlock(topBlock) && world.isAirBlock(topBlock.down(1))) &&
                 !world.getBiome(topBlock).getRegistryName().getResourcePath().contains("ocean") &&
                 world.getBlockState(topBlock.down(2)).getMaterial().isSolid() &&
+                world.getBlockState(topBlock.down(2)).isFullCube() &&
                 !world.getBlockState(topBlock.down(2)).getMaterial().isLiquid()
             ) {
                 found = true;
-                toReturn = new BlockPos(posX, i, posZ);
+                toReturn = new BlockPos(posX, i + 0.5f, posZ);
                 break;
             } else {
                 if (i == height) {

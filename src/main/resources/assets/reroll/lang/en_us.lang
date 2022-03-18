@@ -11,4 +11,4 @@ commands.rerollall.successful=All online players have been rerolled.
 commands.rerollall.failure=Something went wrong, try again.
 commands.lockreroll.successful=Locked reroll command for player %s.
 commands.unlockreroll.successful=Unlocked reroll command for player %s.
-item.reroll.reroll_dice.name=Reroll Dice
+item.reroll.dice.name=Reroll Dice

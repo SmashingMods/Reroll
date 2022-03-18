@@ -7,6 +7,7 @@ public class Config {
     private static final String CATEGORY_REROLL = "reroll";
     private static final String CATEGORY_COMPAT = "compat";
 
+    public static boolean requireItem;
     public static String[] rerollItems;
     public static int minDistance;
     public static boolean rerollAllTogether;
@@ -38,7 +39,8 @@ public class Config {
 
     private static void initRerollConfig(Configuration config) {
         config.addCustomCategoryComment(CATEGORY_REROLL, "Reroll Command Configuration");
-        rerollItems = config.getStringList("Reroll Inventory", CATEGORY_REROLL, new String[]{"reroll:reroll_dice;1"}, "A list of items that will be added to a player's inventory after using the reroll command.\nYou can add any existing item per line like this: \"minecraft:torch;16\".\nNote that you can only have as many items as there are inventory slots.");
+        requireItem = config.getBoolean("Require Dice", CATEGORY_REROLL, true, "Using Reroll requires Reroll Dice. Disables the /reroll command for non-OP players.");
+        rerollItems = config.getStringList("Reroll Inventory", CATEGORY_REROLL, new String[]{"reroll:dice;1"}, "A list of items that will be added to a player's inventory after using the reroll command.\nYou can add any existing item per line like this: \"minecraft:torch;16\".\nNote that you can only have as many items as there are inventory slots.");
         minDistance = config.getInt("Reroll Minimum Distance", CATEGORY_REROLL, 512, 256, 10240, "Determines the minimum distance to teleport when you reroll.");
         rerollAllTogether = config.getBoolean("Reroll All Together", CATEGORY_REROLL, false, "Should '/reroll all' send all players to the same location?");
         useCurrentDim = config.getBoolean("Reroll Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set in the player's current dimension? If set to false, the override value will be used.");

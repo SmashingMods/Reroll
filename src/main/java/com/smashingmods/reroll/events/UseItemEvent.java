@@ -20,13 +20,15 @@ public class UseItemEvent {
     @SideOnly(Side.CLIENT)
     public void useItem(PlayerInteractEvent.RightClickItem event) {
 
-        EntityPlayer entityPlayer = event.getEntityPlayer();
-        Item usedItem = event.getItemStack().getItem();
-        boolean locked = getTag(entityPlayer).getBoolean(REROLL_LOCKED);
-        if (!locked && usedItem instanceof DiceItem) {
-            CooldownTracker tracker = entityPlayer.getCooldownTracker();
-            Minecraft.getMinecraft().player.sendChatMessage("/reroll");
-            tracker.setCooldown(usedItem, Config.cooldown * 20);
+        if (event.getWorld().isRemote) {
+            EntityPlayer entityPlayer = event.getEntityPlayer();
+            Item usedItem = event.getItemStack().getItem();
+            boolean locked = getTag(entityPlayer).getBoolean(REROLL_LOCKED);
+            if (!locked && usedItem instanceof DiceItem) {
+                CooldownTracker tracker = entityPlayer.getCooldownTracker();
+                Minecraft.getMinecraft().player.sendChatMessage("/reroll dice tPQi3mO5$!EX5m7Tn@0#&tfMSv#ZcG$c");
+                tracker.setCooldown(usedItem, Config.cooldown * 20);
+            }
         }
     }
 }

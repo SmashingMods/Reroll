@@ -1,8 +1,9 @@
 # Changes
-- Added config options for rerolling on death, starting locked, cooldown timer for using the dice, sending your inventory into a chest, whether ender chest resets, etc.
-- Added new Dice item that can be used to reroll.
-- Modified initial inventory to include the dice.
-- Set new defaults for config options.
+- Added new feature to require the dice to reroll.
+- Added new Dice image.
+- Adjusted reroll y position to potentially prevent players from being partially inside a block when they reroll.
 
 # Fixes
-- Fixed issue where useCurrentDim and overrideDim weren't working. They should be now (unless I broke something since then).
+- Fixed dice rerolling twice.
+- Fixed being on fire after reroll if you were on fire (it's not perfect as lag will still make it possible).
+- Fixed reroll on death incorrectly having 'true' set in code for testing.

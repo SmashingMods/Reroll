@@ -16,7 +16,7 @@ import java.util.List;
 
 public class DiceItem extends Item {
 
-    public static final String name = "reroll_dice";
+    public static final String name = "dice";
     public static final ResourceLocation registryName = new ResourceLocation(Reroll.MODID, name);
 
     public DiceItem() {
