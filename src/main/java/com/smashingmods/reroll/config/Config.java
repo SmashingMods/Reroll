@@ -44,6 +44,15 @@ public class Config {
         }
     }
 
+    public static Block getSpawnBlock() {
+        if(spawnBlock == null) {
+            if(!blockSpawnName.equals("null") && !blockSpawnName.equals("")) {
+                spawnBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockSpawnName));
+            }
+        }
+        return spawnBlock;
+    }
+
     private static void initRerollConfig(Configuration config) {
         config.addCustomCategoryComment(CATEGORY_REROLL, "Reroll Command Configuration");
         requireItem = config.getBoolean("Require Dice", CATEGORY_REROLL, true, "Using Reroll requires Reroll Dice. Disables the /reroll command for non-OP players.");
@@ -62,9 +71,6 @@ public class Config {
 
         blockSpawnName = config.getString("Block Spawn", CATEGORY_REROLL, "minecraft:leaves", "sets the resource location name for the block you try to spawn on");
         enableBlockSearchSpawn = config.getBoolean("Enable Block Search Spawn", CATEGORY_REROLL, false, "whether or not you automatically search for a block to spawn on");
-        if(!blockSpawnName.equals("null") && !blockSpawnName.equals("")) {
-            spawnBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockSpawnName));
-        }
         config.addCustomCategoryComment(CATEGORY_COMPAT, "Mod Compatibility Configuration");
         timeisupTimer = config.getInt("Time is up Timer", CATEGORY_COMPAT, 12000, 1200, Integer.MAX_VALUE, "Set the Timer value after a reroll.");
     }

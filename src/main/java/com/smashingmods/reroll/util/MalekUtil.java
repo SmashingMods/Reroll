@@ -14,13 +14,13 @@ import java.util.function.Predicate;
 public class MalekUtil {
     public static EntityPlayer setPlayerToBlock(EntityPlayer player) {
         BlockPos currentPosition = player.getPosition();
-        Optional<BlockPos> leafBlock = findClosest(currentPosition, 600, 100, blockPos -> player.getEntityWorld().getBlockState(blockPos).getBlock() == Config.spawnBlock);
+        Optional<BlockPos> leafBlock = findClosest(currentPosition, 600, 100, blockPos -> player.getEntityWorld().getBlockState(blockPos).getBlock() == Config.getSpawnBlock());
         leafBlock.ifPresent(blockPos -> player.setPositionAndUpdate(blockPos.getX(), blockPos.getY()+4, blockPos.getZ()));
         return player;
     }
     public static BlockPos treePosOrNormal(World world, BlockPos pos) {
         System.out.println(Config.spawnBlock);
-        Optional<BlockPos> treePos = MalekUtil.findClosest(pos, 800, 200, blockPos -> world.getBlockState(blockPos).getBlock().equals(Config.spawnBlock));
+        Optional<BlockPos> treePos = MalekUtil.findClosest(pos, 800, 200, blockPos -> world.getBlockState(blockPos).getBlock().equals(Config.getSpawnBlock()));
         return treePos.orElse(pos);
     }
 
