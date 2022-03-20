@@ -3,6 +3,7 @@ package com.smashingmods.reroll.events;
 import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.handler.InventoryHandler;
+import com.smashingmods.reroll.util.MalekUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

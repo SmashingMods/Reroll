@@ -1,7 +1,10 @@
 package com.smashingmods.reroll.config;
 
 import com.smashingmods.reroll.Reroll;
+import net.minecraft.block.Block;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class Config {
     private static final String CATEGORY_REROLL = "reroll";
@@ -20,6 +23,10 @@ public class Config {
     public static boolean rerollOnDeath;
     public static boolean startLocked;
     public static int cooldown;
+    public static String blockSpawnName;
+    public static boolean enableBlockSearchSpawn;
+
+    public static Block spawnBlock = null;
 
     public static int timeisupTimer;
 
@@ -53,6 +60,11 @@ public class Config {
         startLocked = config.getBoolean("Lock Reroll", CATEGORY_REROLL, true, "This is a safety feature to lock the use of reroll at the start. Users are required to use /reroll unlock to use reroll just in case.");
         cooldown = config.getInt("Reroll Cooldown", CATEGORY_REROLL, 60, 30, Integer.MAX_VALUE, "Cooldown time to use reroll dice.");
 
+        blockSpawnName = config.getString("Block Spawn", CATEGORY_REROLL, "minecraft:leaves", "sets the resource location name for the block you try to spawn on");
+        enableBlockSearchSpawn = config.getBoolean("Enable Block Search Spawn", CATEGORY_REROLL, false, "whether or not you automatically search for a block to spawn on");
+        if(!blockSpawnName.equals("null") && !blockSpawnName.equals("")) {
+            spawnBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockSpawnName));
+        }
         config.addCustomCategoryComment(CATEGORY_COMPAT, "Mod Compatibility Configuration");
         timeisupTimer = config.getInt("Time is up Timer", CATEGORY_COMPAT, 12000, 1200, Integer.MAX_VALUE, "Set the Timer value after a reroll.");
     }
