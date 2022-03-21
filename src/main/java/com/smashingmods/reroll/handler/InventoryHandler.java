@@ -31,8 +31,10 @@ public class InventoryHandler {
             }
         }
 
-        items.forEach(item -> {
-            ItemHandlerHelper.giveItemToPlayer(entityPlayer, item);
-        });
+        if (items.size() > 0) {
+            items.forEach(item -> {
+                ItemHandlerHelper.giveItemToPlayer(entityPlayer, item);
+            });
+        }
     }
 }
