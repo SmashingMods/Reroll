@@ -21,7 +21,7 @@ public class DiceItem extends Item {
 
     public DiceItem() {
         setRegistryName(registryName);
-        setUnlocalizedName(registryName.toString());
+        setTranslationKey(registryName.toString());
         setCreativeTab(CreativeTabs.MISC);
         setMaxStackSize(1);
         setMaxDamage(0);

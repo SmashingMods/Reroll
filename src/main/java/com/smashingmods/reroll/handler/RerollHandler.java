@@ -9,6 +9,7 @@ import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.item.DiceItem;
 import com.smashingmods.reroll.model.RerollObject;
 import com.smashingmods.reroll.model.SpiralObject;
+import com.smashingmods.reroll.util.PositionUtil;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -212,9 +213,9 @@ public class RerollHandler {
         server.getCommandManager().executeCommand(server, String.format("/tp %s %d %d %d", entityPlayer.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
         entityPlayer.setSpawnPoint(blockPos, true);
     }
-
+  
     public BlockPos generateValidBlockPos(EntityPlayerMP entityPlayer, boolean next) {
-
+      
         SPIRAL = CURRENT.getDimensionObjectByID(entityPlayer.dimension).getSpiral();
 
         if (next) SPIRAL.setSpiral(SPIRAL.next());
@@ -232,7 +233,7 @@ public class RerollHandler {
             if (
                 (world.canBlockSeeSky(topBlock) && world.canBlockSeeSky(topBlock.down(1))) &&
                 (world.isAirBlock(topBlock) && world.isAirBlock(topBlock.down(1))) &&
-                !world.getBiome(topBlock).getRegistryName().getResourcePath().contains("ocean") &&
+                !world.getBiome(topBlock).getRegistryName().getPath().contains("ocean") &&
                 world.getBlockState(topBlock.down(2)).getMaterial().isSolid() &&
                 world.getBlockState(topBlock.down(2)).isFullCube() &&
                 !world.getBlockState(topBlock.down(2)).getMaterial().isLiquid()
@@ -249,11 +250,13 @@ public class RerollHandler {
         Reroll.MAPPER.writeFile(CURRENT);
 
         if (found) {
-            return toReturn;
+            return PositionUtil.treePosOrNormal(entityPlayer.getEntityWorld(), toReturn);
         } else {
-            return generateValidBlockPos(entityPlayer, next);
+            return PositionUtil.treePosOrNormal(entityPlayer.getEntityWorld(), generateValidBlockPos(entityPlayer, next));
         }
     }
+
+
 
     public void next() {
         SPIRAL.setSpiral(SPIRAL.next());
