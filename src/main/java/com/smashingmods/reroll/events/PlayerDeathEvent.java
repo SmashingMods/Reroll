@@ -16,7 +16,7 @@ public class PlayerDeathEvent {
     @SubscribeEvent
     public void playerDeath(LivingDamageEvent event) {
         Entity entity = event.getEntity();
-        MinecraftServer server = Minecraft.getMinecraft().getIntegratedServer();
+        MinecraftServer server = event.getEntity().getServer();
         ICommandManager manager = server.getCommandManager();
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityPlayer = (EntityPlayer) entity;
