@@ -44,14 +44,6 @@ public class Config {
         }
     }
 
-    public static Block getSpawnBlock() {
-        if(spawnBlock == null) {
-            if(!blockSpawnName.equals("null") && !blockSpawnName.equals("")) {
-                spawnBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockSpawnName));
-            }
-        }
-        return spawnBlock;
-    }
 
     private static void initRerollConfig(Configuration config) {
         config.addCustomCategoryComment(CATEGORY_REROLL, "Reroll Command Configuration");

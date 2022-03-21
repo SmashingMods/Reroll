@@ -11,8 +11,8 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 @IFMLLoadingPlugin.MCVersion("1.12.2")
-@IFMLLoadingPlugin.Name("Malek's Food Buffs")
-public class CoreMod implements IFMLLoadingPlugin {
+@IFMLLoadingPlugin.Name(Reroll.MODID)
+public class RerollCoreMod implements IFMLLoadingPlugin {
 
     @Override
     public String[] getASMTransformerClass() {

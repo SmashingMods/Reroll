@@ -8,7 +8,7 @@ import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.model.RerollObject;
 import com.smashingmods.reroll.model.SpiralObject;
-import com.smashingmods.reroll.util.MalekUtil;
+import com.smashingmods.reroll.util.PositionUtil;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -238,9 +238,9 @@ public class RerollHandler {
         Reroll.MAPPER.writeFile(CURRENT);
 
         if (found) {
-            return MalekUtil.treePosOrNormal(entityPlayer.getEntityWorld(), toReturn);
+            return PositionUtil.treePosOrNormal(entityPlayer.getEntityWorld(), toReturn);
         } else {
-            return MalekUtil.treePosOrNormal(entityPlayer.getEntityWorld(), generateValidBlockPos(entityPlayer, next));
+            return PositionUtil.treePosOrNormal(entityPlayer.getEntityWorld(), generateValidBlockPos(entityPlayer, next));
         }
     }
 

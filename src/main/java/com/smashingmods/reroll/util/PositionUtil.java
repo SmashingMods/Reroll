@@ -3,24 +3,35 @@ package com.smashingmods.reroll.util;
 import com.google.common.collect.AbstractIterator;
 import com.smashingmods.reroll.config.Config;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLeaves;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class MalekUtil {
+public class PositionUtil {
+    private static Block spawnBlock;
+    public static Block getSpawnBlock() {
+        if(spawnBlock == null) {
+            if(!Config.blockSpawnName.equals("null") && !Config.blockSpawnName.equals("")) {
+                spawnBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Config.blockSpawnName));
+            }
+        }
+        return spawnBlock;
+    }
+
     public static EntityPlayer setPlayerToBlock(EntityPlayer player) {
         BlockPos currentPosition = player.getPosition();
-        Optional<BlockPos> leafBlock = findClosest(currentPosition, 600, 100, blockPos -> player.getEntityWorld().getBlockState(blockPos).getBlock() == Config.getSpawnBlock());
+        Optional<BlockPos> leafBlock = findClosest(currentPosition, 600, 100, blockPos -> player.getEntityWorld().getBlockState(blockPos).getBlock() == getSpawnBlock());
         leafBlock.ifPresent(blockPos -> player.setPositionAndUpdate(blockPos.getX(), blockPos.getY()+4, blockPos.getZ()));
         return player;
     }
     public static BlockPos treePosOrNormal(World world, BlockPos pos) {
         System.out.println(Config.spawnBlock);
-        Optional<BlockPos> treePos = MalekUtil.findClosest(pos, 800, 200, blockPos -> world.getBlockState(blockPos).getBlock().equals(Config.getSpawnBlock()));
+        Optional<BlockPos> treePos = PositionUtil.findClosest(pos, 800, 200, blockPos -> world.getBlockState(blockPos).getBlock().equals(getSpawnBlock()));
         return treePos.orElse(pos);
     }
 
