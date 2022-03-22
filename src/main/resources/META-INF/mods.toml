@@ -1,0 +1,36 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+issueTrackerURL="https://github.com/SmashingMods/Reroll/issues"
+[[mods]]
+modId="reroll"
+version="${file.jarVersion}"
+displayName="Reroll"
+logoFile="reroll-logo.png"
+credits=""
+authors="DarkArcana"
+description='''
+Reroll is a mod designed to completely reroll or reset a player. It will remove their inventory, achievements, etc. and teleport them far away to simulate a completely new world. This is great for hardcore style modpacks that don't want to create new worlds for every reset. It works in single player and on servers.
+
+Reroll is highly configurable giving you many options for how you want to play. These options are mostly for modpack makers to tune the Rerolling mechanic to their world.
+'''
+
+# A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
+#updateJSONURL="https://change.me.example.invalid/updates.json" #optional
+# A URL for the "homepage" for this mod, displayed in the mod UI
+#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
+# A file name (in the root of the mod JAR) containing a logo for display
+# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+
+[[dependencies.reroll]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.reroll]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.16.5,1.17)"
+    ordering="NONE"
+    side="BOTH"

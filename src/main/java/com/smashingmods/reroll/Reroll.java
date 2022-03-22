@@ -1,89 +1,85 @@
 package com.smashingmods.reroll;
 
-import com.smashingmods.reroll.command.CommandReroll;
-import com.smashingmods.reroll.config.Config;
-import com.smashingmods.reroll.events.PlayerDeathEvent;
-import com.smashingmods.reroll.events.PlayerLoginEvent;
-import com.smashingmods.reroll.events.UseItemEvent;
-import com.smashingmods.reroll.item.DiceItem;
-import com.smashingmods.reroll.util.JsonMapper;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
+import com.mojang.brigadier.CommandDispatcher;
+import com.smashingmods.reroll.capability.LockCapability;
+import com.smashingmods.reroll.capability.LockCapabilityImplementation;
+import com.smashingmods.reroll.capability.LockCapabilityInterface;
+import com.smashingmods.reroll.capability.LockCapabilityProvider;
+import com.smashingmods.reroll.command.RerollCommand;
+import com.smashingmods.reroll.config.ConfigHandler;
+import net.minecraft.command.CommandSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-
-@Mod(modid = Reroll.MODID, version = "1.12.2-1.4.1", useMetadata = true)
+@Mod(Reroll.MODID)
 @Mod.EventBusSubscriber
 public class Reroll {
     public static final String MODID = "reroll";
-    public static Configuration CONFIG;
-    public static Logger LOGGER;
-    public static JsonMapper MAPPER = new JsonMapper();
+    public static IEventBus MOD_EVENT_BUS;
+    public static final Logger LOGGER = LogManager.getLogger();
 
-    // Mod Compatibility
-    public static boolean MODCOMPAT_TIMEISUP;
-    public static boolean MODCOMPAT_BAUBLES;
-    public static boolean MODCOMPAT_GAMESSTAGES;
-    public static boolean MODCOMPAT_ENDERSKILLS;
+    public Reroll() {
 
-    @GameRegistry.ObjectHolder(DiceItem.name)
-    public static final Item diceItem = Items.AIR;
-
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        String path = event.getModConfigurationDirectory().getPath();
-        LOGGER = event.getModLog();
-        CONFIG = new Configuration(new File(path, "reroll.cfg"));
-        Config.readConfig();
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_SPEC);
+        MOD_EVENT_BUS = FMLJavaModLoadingContext.get().getModEventBus();
+        MOD_EVENT_BUS.addListener(this::commonSetup);
+        MOD_EVENT_BUS.addListener(this::clientSetup);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
-    @EventHandler
-    public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new PlayerLoginEvent());
-        MinecraftForge.EVENT_BUS.register(new PlayerDeathEvent());
-        MinecraftForge.EVENT_BUS.register(new UseItemEvent());
+    public void commonSetup(final FMLCommonSetupEvent event) {
+        LockCapability.register();
+        MinecraftForge.EVENT_BUS.register(RegisterEvents.class);
+
+//        MinecraftForge.EVENT_BUS.register(new PlayerLoginEvent());
+//        MinecraftForge.EVENT_BUS.register(new PlayerDeathEvent());
+//        MinecraftForge.EVENT_BUS.register(new UseItemEvent());
     }
 
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        MODCOMPAT_TIMEISUP = Loader.isModLoaded("timeisup");
-        MODCOMPAT_BAUBLES = Loader.isModLoaded("baubles");
-        MODCOMPAT_GAMESSTAGES = Loader.isModLoaded("gamestages");
-        MODCOMPAT_ENDERSKILLS = Loader.isModLoaded("enderskills");
+    private void clientSetup(final FMLClientSetupEvent event) {
 
-        if (CONFIG.hasChanged()) {
-            CONFIG.save();
+    }
+
+    @SubscribeEvent
+    public void serverSetup(FMLServerStartingEvent event) {
+//        event.registerServerCommand(new CommandReroll());
+    }
+
+    public static class RegisterEvents {
+
+//        @SubscribeEvent
+//        public static void onItemRegistry(final RegistryEvent.Register<Item> event) {
+////            event.getRegistry().register(new DiceItem());
+//        }
+
+        @SubscribeEvent
+        public static void onRegisterCommandsEvent(@NotNull RegisterCommandsEvent event) {
+            CommandDispatcher<CommandSource> commandDispatcher = event.getDispatcher();
+            RerollCommand.register(commandDispatcher);
         }
-    }
 
-    @EventHandler
-    public void serverLoad(FMLServerStartingEvent event) {
-        event.registerServerCommand(new CommandReroll());
-    }
-
-    @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().registerAll(new DiceItem());
-    }
-
-    @SubscribeEvent
-    public static void registerModels(ModelRegistryEvent event) {
-        ModelLoader.setCustomModelResourceLocation(Reroll.diceItem, 0, new ModelResourceLocation(DiceItem.registryName, "inventory"));
+        @SubscribeEvent
+        public static void onAttachCapabilitiesEvent(@NotNull AttachCapabilitiesEvent<Entity> event) {
+            if (event.getObject() instanceof PlayerEntity) {
+                event.addCapability(new ResourceLocation("reroll:lock_capability"), new LockCapabilityProvider());
+            }
+        }
     }
 }

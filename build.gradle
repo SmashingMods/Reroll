@@ -1,52 +1,83 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net/' }
+        maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.parchmentmc:librarian:1.+'
     }
 }
+
 plugins {
     id 'com.matthewprenger.cursegradle' version '1.4.0'
     id 'java'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'maven-publish'
 apply plugin: 'java'
 
-version = '1.12.2-1.4.1'
+version = "$minecraftVersion-$modVersion"
 group = 'com.smashingmods.reroll'
-archivesBaseName = 'reroll'
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+archivesBaseName = modid
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(11)
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
-    mappings channel: 'snapshot', version: '20171003-1.12'
+    mappings channel: 'parchment', version: "$parchmentVersion"
     runs {
         client {
             workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
+            mods {
+                reroll {
+                    source sourceSets.main
+                }
+            }
         }
 
         server {
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
+            mods {
+                reroll {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'reroll', '--all', '--output', file('src/generated/resources'), '--existing', file('src/main/resources')
+
+            mods {
+                reroll {
+                    source sourceSets.main
+                }
+            }
         }
     }
 }
 
-repositories {
-    maven { url "https://www.cursemaven.com" }
-}
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
-    compile fg.deobf("curse.maven:timeisup-437596:3511732")
-    compile fg.deobf("curse.maven:baubles-227083:2518667")
-    compile fg.deobf("curse.maven:enderskills-391325:3523964")
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+    minecraft "net.minecraftforge:forge:$minecraftVersion-$forgeVersion"
+    implementation 'org.jetbrains:annotations:23.0.0'
+}
+
+repositories {
+    maven { url "https://www.cursemaven.com" }
 }
 
 jar {
@@ -57,23 +88,10 @@ jar {
             "Specification-Version": "1",
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"SmashingMods",
+            "Implementation-Vendor": "SmashingMods",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-
-    dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.findAll {it.name.contains("jackson")}.collect { zipTree(it)}
-    }
-}
-
-task copyLibs(type: Copy) {
-    from configurations.compile
-    into 'libraries'
-    include "jackson-annotations-2.13.2.jar"
-    include "jackson-core-2.13.2.jar"
-    include "jackson-databind-2.13.2.jar"
 }
 
 jar.finalizedBy('reobfJar')
@@ -91,17 +109,30 @@ publishing {
     }
 }
 
+def secrets = new Properties()
+file('secrets.properties').withInputStream {
+    stream -> secrets.load(stream)
+}
+
+fileTree("secrets").matching {
+    include "**/*.properties"
+}.each {
+    File file ->
+        file.withInputStream {
+            stream -> secrets.load(stream)
+        }
+}
+
 curseforge {
-    apiKey = '0bf5fb4f-44a2-451e-aac4-97e39b16fcad'
+    apiKey = secrets.getProperty("apiKey")
     project {
         id = '592315'
         releaseType = 'release'
         changelogType = 'markdown'
         changelog = file("changelog.md")
         addGameVersion 'Forge'
-        addGameVersion 'Java 12'
-        addGameVersion '1.12.2'
-
+        addGameVersion 'Java 16'
+        addGameVersion '1.16.5'
         mainArtifact(jar) {
             displayName = "Reroll $project.version"
         }
