@@ -1,9 +1,9 @@
 package com.smashingmods.reroll.handler;
 
-import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.capability.WorldSavedData;
 import com.smashingmods.reroll.config.ConfigHandler;
 import com.smashingmods.reroll.model.Spiral;
+import com.smashingmods.reroll.util.RerollUtilities;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -11,15 +11,13 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.EntitySelectionContext;
-import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -29,53 +27,26 @@ public class RerollHandler {
 
     public RerollHandler() {}
 
-    public void reroll(ServerWorld world, ServerPlayerEntity pPlayer, boolean pNext) {
+    public void reroll(ServerPlayerEntity pPlayer, boolean pNext) {
 
         resetLocation(pPlayer, pNext);
-        resetInventory(pPlayer);
         resetData(pPlayer);
-
-//        server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", pPlayer.getName()));
-//        if (Config.setNewInventory) {
-//            InventoryHandler.setInventory(pPlayer, Config.rerollItems);
-//        }
+        resetInventory(pPlayer);
 //        pPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
     }
 
     public void resetInventory(ServerPlayerEntity pPlayer) {
-        pPlayer.inventory.clearContent();
+        if (!ConfigHandler.Common.sendInventoryToChest.get()) {
+            pPlayer.inventory.clearContent();
+            if (ConfigHandler.Common.setNewInventory.get()) {
+                RerollUtilities.setInventory(pPlayer);
+            }
+        }  // send to chest
+
+        if (ConfigHandler.Common.resetEnderChest.get()) pPlayer.getEnderChestInventory().clearContent();
         pPlayer.doCloseContainer();
-        pPlayer.inventory.dropAll();
     }
 
-//
-//    public void resetInventory(ServerPlayerEntity pPlayer) {
-//
-//        if (Config.sendInventoryToChest && !pPlayer.inventory.isEmpty()) {
-//            World world = pPlayer.getEntityWorld();
-//            BlockPos position = pPlayer.getPosition();
-//            List<BlockPos> chestPositions = generateValidChestPosition(world, position);
-//            final int[] count = {0};
-//            chestPositions.forEach(pos -> {
-//                world.setBlockState(pos, Blocks.CHEST.getDefaultState());
-//                for (int slot = 0; slot < 27; slot++) {
-//                    IItemHandler capability = world.getTileEntity(pos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN);
-//                    capability.insertItem(slot, pPlayer.inventory.getStackInSlot(count[0]), false);
-//                    pPlayer.inventory.removeStackFromSlot(count[0]);
-//                    count[0]++;
-//                }
-//            });
-//        } else {
-//            pPlayer.inventory.mainInventory.clear();
-//            pPlayer.inventory.armorInventory.clear();
-//            pPlayer.inventory.offHandInventory.clear();
-//        }
-//
-//        pPlayer.closeScreen();
-//        if (Config.resetEnderChest) pPlayer.getInventoryEnderChest().clear();
-//        pPlayer.inventory.dropAllItems();
-//    }
-//
     public void resetData(ServerPlayerEntity pPlayer) {
 
         pPlayer.clearFire();
@@ -106,19 +77,19 @@ public class RerollHandler {
             world = pPlayer.getLevel();
         } else {
             if (ConfigHandler.Common.useSpawnDim.get()) {
-                world = pPlayer.getServer().getLevel(pPlayer.getRespawnDimension());
+                world = Objects.requireNonNull(pPlayer.getServer()).getLevel(pPlayer.getRespawnDimension());
             } else {
                 RegistryKey<World> worldRegistryKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(ConfigHandler.Common.overrideDim.get()));
-                world = pPlayer.getServer().getLevel(worldRegistryKey);
+                world = Objects.requireNonNull(pPlayer.getServer()).getLevel(worldRegistryKey);
             }
         }
 
-        newPosition = generateValidBlockPos(world, pPlayer, pNext);
+        newPosition = generateValidBlockPos(Objects.requireNonNull(world), pPlayer, pNext);
         pPlayer.teleportTo(world, newPosition.getX(), newPosition.getY() + 1.5d, newPosition.getZ(), 0, 0);
         pPlayer.sendMessage(new StringTextComponent("New reroll position found."), pPlayer.getUUID());
     }
 
-    public BlockPos generateValidBlockPos(@NotNull ServerWorld pWorld, ServerPlayerEntity pPlayer, @Nullable boolean pNext) {
+    public BlockPos generateValidBlockPos(@NotNull ServerWorld pWorld, ServerPlayerEntity pPlayer, boolean pNext) {
 
         pPlayer.sendMessage(new StringTextComponent("Searching for valid reroll position . . ."), pPlayer.getUUID());
 

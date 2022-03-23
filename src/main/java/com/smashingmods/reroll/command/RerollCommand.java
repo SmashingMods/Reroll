@@ -2,15 +2,14 @@ package com.smashingmods.reroll.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.smashingmods.reroll.capability.LockCapability;
-import com.smashingmods.reroll.capability.LockCapabilityImplementation;
+import com.smashingmods.reroll.capability.RerollCapability;
+import com.smashingmods.reroll.capability.RerollCapabilityImplementation;
 import com.smashingmods.reroll.handler.RerollHandler;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.server.ServerWorld;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -60,9 +59,9 @@ public class RerollCommand {
 
     private static int self(@NotNull CommandSource pSource) throws CommandSyntaxException {
         try {
-            LockCapabilityImplementation lockCapability = Objects.requireNonNull(pSource.getEntity()).getCapability(LockCapability.CAPABILITY_LOCK, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+            RerollCapabilityImplementation lockCapability = Objects.requireNonNull(pSource.getEntity()).getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
             if (!lockCapability.getLock()) {
-                HANDLER.reroll(pSource.getLevel(), pSource.getPlayerOrException(), true);
+                HANDLER.reroll(pSource.getPlayerOrException(), true);
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -73,7 +72,7 @@ public class RerollCommand {
 
     private static int lockSelf(@NotNull CommandSource pSource)  {
         try {
-            LockCapabilityImplementation lockCapability = Objects.requireNonNull(pSource.getEntity()).getCapability(LockCapability.CAPABILITY_LOCK, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+            RerollCapabilityImplementation lockCapability = Objects.requireNonNull(pSource.getEntity()).getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
             lockCapability.setLock(true);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -84,7 +83,7 @@ public class RerollCommand {
 
     private static int unlockSelf(@NotNull CommandSource pSource) {
         try {
-            LockCapabilityImplementation lockCapability = Objects.requireNonNull(pSource.getEntity()).getCapability(LockCapability.CAPABILITY_LOCK, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+            RerollCapabilityImplementation lockCapability = Objects.requireNonNull(pSource.getEntity()).getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
             lockCapability.setLock(false);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -95,10 +94,9 @@ public class RerollCommand {
 
     private static int player(@NotNull Entity pPlayer) {
         try {
-            LockCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(LockCapability.CAPABILITY_LOCK, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+            RerollCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
             if (!lockCapability.getLock()) {
-                ServerWorld world = Objects.requireNonNull(pPlayer.getServer()).getLevel(pPlayer.level.dimension());
-                HANDLER.reroll(world, (ServerPlayerEntity) pPlayer, true);
+                HANDLER.reroll((ServerPlayerEntity) pPlayer, true);
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -109,7 +107,7 @@ public class RerollCommand {
 
     private static int lockPlayer(Entity pPlayer) {
         try {
-            LockCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(LockCapability.CAPABILITY_LOCK, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+            RerollCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
             lockCapability.setLock(true);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -120,7 +118,7 @@ public class RerollCommand {
 
     private static int unlockPlayer(Entity pPlayer) {
         try {
-            LockCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(LockCapability.CAPABILITY_LOCK, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+            RerollCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
             lockCapability.setLock(false);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -133,9 +131,9 @@ public class RerollCommand {
         List<ServerPlayerEntity> list = pSource.getServer().getPlayerList().getPlayers();
         for (ServerPlayerEntity player : list) {
             try {
-                LockCapabilityImplementation lockCapability = player.getEntity().getCapability(LockCapability.CAPABILITY_LOCK, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+                RerollCapabilityImplementation lockCapability = player.getEntity().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
                 if (!lockCapability.getLock()) {
-                    HANDLER.reroll(player.getLevel(), player, true);
+                    HANDLER.reroll(player, true);
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();

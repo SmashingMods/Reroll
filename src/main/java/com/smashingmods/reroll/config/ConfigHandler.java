@@ -1,11 +1,13 @@
 package com.smashingmods.reroll.config;
 
+import com.smashingmods.reroll.Reroll;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigHandler {
 
@@ -35,11 +37,9 @@ public class ConfigHandler {
         public static ForgeConfigSpec.BooleanValue startLocked;
         public static ForgeConfigSpec.IntValue cooldown;
 
-        private final String seperator = System.getProperty("line.separator");
-
         public Common(ForgeConfigSpec.Builder builder) {
+            String seperator = System.getProperty("line.separator");
             builder.push("Reroll Command Configuration");
-            builder.comment("This is a test!");
             requireItem = builder
                     .comment(seperator +
                             "  Require Item" + seperator +
@@ -54,7 +54,14 @@ public class ConfigHandler {
                             "  You can add any existing item per line like this: \"minecraft:torch;16\"." + seperator +
                             "  Note that you can only have as many items as there are inventory slots." +
                             seperator)
-                    .defineList("rerollItems", Collections.emptyList(), item -> item instanceof String && ResourceLocation.tryParse(item + ":test") != null);
+                    .defineList("rerollItems", Collections.emptyList(), configItem -> {
+                        if (configItem instanceof String) {
+                            String name = ((String) configItem).split(";")[0];
+                            int count = Integer.parseInt(((String) configItem).split(";")[1]);
+                            return ResourceLocation.tryParse(name) != null && count > 0 && count <= 64;
+                        }
+                        return false;
+                    });
 
             minDistance = builder
                     .comment(seperator +

@@ -1,13 +1,22 @@
 package com.smashingmods.reroll.capability;
 
-import com.smashingmods.reroll.Reroll;
 import net.minecraft.nbt.CompoundNBT;
 import org.jetbrains.annotations.NotNull;
 
-public class LockCapabilityImplementation implements LockCapabilityInterface {
+public class RerollCapabilityImplementation implements RerollCapabilityInterface {
 
-    private static final String TAG_NAME = Reroll.MODID + "_locked";
+    private static boolean ITEMS_RECEIVED = false;
     private static boolean LOCK = false;
+
+    @Override
+    public boolean getItemsReceived() {
+        return ITEMS_RECEIVED;
+    }
+
+    @Override
+    public void setItemsReceived(boolean itemsReceived) {
+        ITEMS_RECEIVED = itemsReceived;
+    }
 
     @Override
     public boolean getLock() {
@@ -20,19 +29,16 @@ public class LockCapabilityImplementation implements LockCapabilityInterface {
     }
 
     @Override
-    public String getTagName() {
-        return TAG_NAME;
-    }
-
-    @Override
     public CompoundNBT serializeNBT() {
         final CompoundNBT tag = new CompoundNBT();
-        tag.putBoolean(TAG_NAME, LOCK);
+        tag.putBoolean("recieved", ITEMS_RECEIVED);
+        tag.putBoolean("locked", LOCK);
         return tag;
     }
 
     @Override
     public void deserializeNBT(@NotNull CompoundNBT nbt) {
-        LOCK = nbt.getBoolean(TAG_NAME);
+        ITEMS_RECEIVED = nbt.getBoolean("received");
+        LOCK = nbt.getBoolean("locked");
     }
 }

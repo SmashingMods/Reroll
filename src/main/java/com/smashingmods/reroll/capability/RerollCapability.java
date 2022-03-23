@@ -4,16 +4,16 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 
-public class LockCapability {
+public class RerollCapability {
 
-    @CapabilityInject(LockCapabilityInterface.class)
-    public static Capability<LockCapabilityImplementation> CAPABILITY_LOCK = null;
+    @CapabilityInject(RerollCapabilityInterface.class)
+    public static Capability<RerollCapabilityImplementation> REROLL_CAPABILITY = null;
 
     public static void register() {
         CapabilityManager.INSTANCE.register(
-                LockCapabilityInterface.class,
-                new LockCapabilityStorage(),
-                LockCapabilityImplementation::new
+                RerollCapabilityInterface.class,
+                new RerollCapabilityStorage(),
+                RerollCapabilityImplementation::new
         );
     }
 }
