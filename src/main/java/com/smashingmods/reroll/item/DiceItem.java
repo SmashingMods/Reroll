@@ -67,7 +67,7 @@ public class DiceItem extends Item {
     @Override
     @Nonnull
     public UseAction getUseAnimation(@Nonnull ItemStack pStack) {
-        return UseAction.BLOCK;
+        return UseAction.BOW;
     }
 
     @Override
