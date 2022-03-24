@@ -4,7 +4,8 @@ import com.smashingmods.reroll.Reroll;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
-import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
 
 public class WorldSavedData extends net.minecraft.world.storage.WorldSavedData {
 
@@ -27,14 +28,14 @@ public class WorldSavedData extends net.minecraft.world.storage.WorldSavedData {
     }
 
     @Override
-    @NotNull
-    public  CompoundNBT save(@NotNull CompoundNBT pTag) {
+    @Nonnull
+    public  CompoundNBT save(@Nonnull CompoundNBT pTag) {
         pTag.put("spiral", data);
         return pTag;
     }
 
-    @NotNull
-    public static WorldSavedData getDataForWorld(@NotNull ServerWorld world, String pName) {
+    @Nonnull
+    public static WorldSavedData getDataForWorld(@Nonnull ServerWorld world, String pName) {
         DimensionSavedDataManager storage = world.getDataStorage();
         return storage.computeIfAbsent(() -> new WorldSavedData(pName), Reroll.MODID);
     }

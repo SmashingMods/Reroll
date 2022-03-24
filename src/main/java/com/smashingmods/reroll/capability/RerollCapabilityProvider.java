@@ -6,17 +6,18 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class RerollCapabilityProvider implements ICapabilitySerializable<INBT> {
 
     private final RerollCapabilityImplementation rerollCapability = new RerollCapabilityImplementation();
 
-    @NotNull
+    @Nonnull
     @Override
     @SuppressWarnings("unchecked")
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         return (LazyOptional<T>) LazyOptional.of(() -> rerollCapability);
     }
 

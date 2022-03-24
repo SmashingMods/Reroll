@@ -24,7 +24,7 @@ version = "$minecraftVersion-$modVersion"
 group = 'com.smashingmods.reroll'
 archivesBaseName = modid
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(11)
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
@@ -73,7 +73,6 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     minecraft "net.minecraftforge:forge:$minecraftVersion-$forgeVersion"
-    implementation 'org.jetbrains:annotations:23.0.0'
 }
 
 repositories {

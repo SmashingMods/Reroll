@@ -27,3 +27,4 @@ forge*changelog.txt
 
 # Project files
 secrets.properties
+.cache

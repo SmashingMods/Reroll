@@ -1,7 +1,8 @@
 package com.smashingmods.reroll.capability;
 
 import net.minecraft.nbt.CompoundNBT;
-import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
 
 public class RerollCapabilityImplementation implements RerollCapabilityInterface {
 
@@ -37,7 +38,7 @@ public class RerollCapabilityImplementation implements RerollCapabilityInterface
     }
 
     @Override
-    public void deserializeNBT(@NotNull CompoundNBT nbt) {
+    public void deserializeNBT(@Nonnull CompoundNBT nbt) {
         ITEMS_RECEIVED = nbt.getBoolean("received");
         LOCK = nbt.getBoolean("locked");
     }

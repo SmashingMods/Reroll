@@ -8,6 +8,7 @@ import com.smashingmods.reroll.command.RerollCommand;
 import com.smashingmods.reroll.config.ConfigHandler;
 import com.smashingmods.reroll.handler.RerollHandler;
 import com.smashingmods.reroll.item.ItemRegistry;
+import com.smashingmods.reroll.network.RerollPacketHandler;
 import com.smashingmods.reroll.util.RerollUtilities;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
@@ -28,7 +29,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
 
 
 @Mod(Reroll.MODID)
@@ -48,6 +50,7 @@ public class Reroll {
 
     public void commonSetup(final FMLCommonSetupEvent event) {
         RerollCapability.register();
+        RerollPacketHandler.register();
         MinecraftForge.EVENT_BUS.register(RegisterEvents.class);
     }
 
@@ -55,22 +58,23 @@ public class Reroll {
     public static class RegisterEvents {
 
         @SubscribeEvent
-        public static void onRegisterCommandsEvent(@NotNull RegisterCommandsEvent event) {
+        public static void onRegisterCommandsEvent(@Nonnull RegisterCommandsEvent event) {
             CommandDispatcher<CommandSource> commandDispatcher = event.getDispatcher();
             RerollCommand.register(commandDispatcher);
         }
 
         @SubscribeEvent
-        public static void onAttachCapabilitiesEvent(@NotNull AttachCapabilitiesEvent<Entity> event) {
+        public static void onAttachCapabilitiesEvent(@Nonnull AttachCapabilitiesEvent<Entity> event) {
             if (event.getObject() instanceof PlayerEntity) {
                 event.addCapability(new ResourceLocation("reroll:capability"), new RerollCapabilityProvider());
             }
         }
 
         @SubscribeEvent
-        public static void onLivingDeathEvent(@NotNull LivingDamageEvent event) {
+        public static void onLivingDeathEvent(@Nonnull LivingDamageEvent event) {
             if (ConfigHandler.Common.rerollOnDeath.get()) {
                 if (event.getEntity() instanceof PlayerEntity) {
+
                     RerollHandler handler = new RerollHandler();
                     PlayerEntity player = (PlayerEntity) event.getEntity();
                     float amount = event.getAmount();
@@ -85,12 +89,16 @@ public class Reroll {
         }
 
         @SubscribeEvent
-        public static void onPlayerLoggedInEvent(@NotNull PlayerEvent.PlayerLoggedInEvent event) {
+        public static void onPlayerLoggedInEvent(@Nonnull PlayerEvent.PlayerLoggedInEvent event) {
             if (ConfigHandler.Common.initialInventory.get()) {
-                RerollUtilities.setInventory(event.getPlayer());
+                PlayerEntity player = event.getPlayer();
                 try {
-                    RerollCapabilityImplementation lockCapability = event.getPlayer().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
-                    lockCapability.setItemsReceived(true);
+                    RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
+
+                    if (!rerollCapability.getItemsReceived()) {
+                        RerollUtilities.setInventory(player);
+                        rerollCapability.setItemsReceived(true);
+                    }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }

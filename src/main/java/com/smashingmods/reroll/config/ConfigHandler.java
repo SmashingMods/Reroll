@@ -1,13 +1,10 @@
 package com.smashingmods.reroll.config;
 
-import com.smashingmods.reroll.Reroll;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConfigHandler {
 
@@ -47,6 +44,9 @@ public class ConfigHandler {
                             seperator)
                     .define("requireItem", true);
 
+            Vector<String> itemsVector = new Vector<>();
+            itemsVector.add("reroll:dice;1");
+
             rerollItems = builder
                     .comment(seperator +
                             "  Reroll Items" + seperator +
@@ -54,7 +54,7 @@ public class ConfigHandler {
                             "  You can add any existing item per line like this: \"minecraft:torch;16\"." + seperator +
                             "  Note that you can only have as many items as there are inventory slots." +
                             seperator)
-                    .defineList("rerollItems", Collections.emptyList(), configItem -> {
+                    .defineList("rerollItems", itemsVector, configItem -> {
                         if (configItem instanceof String) {
                             String name = ((String) configItem).split(";")[0];
                             int count = Integer.parseInt(((String) configItem).split(";")[1]);
@@ -75,7 +75,7 @@ public class ConfigHandler {
                             "  Reroll All Together" + seperator +
                             "  Should '/reroll all' send all players to the same location?" +
                             seperator)
-                    .define("rerollAllTogether", false);
+                    .define("rerollAllTogether", true);
 
             useCurrentDim = builder
                     .comment(seperator +

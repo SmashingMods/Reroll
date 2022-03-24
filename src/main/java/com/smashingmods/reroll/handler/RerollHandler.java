@@ -15,8 +15,9 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -28,11 +29,18 @@ public class RerollHandler {
     public RerollHandler() {}
 
     public void reroll(ServerPlayerEntity pPlayer, boolean pNext) {
+        reroll(null, pPlayer, pNext);
+    }
 
-        resetLocation(pPlayer, pNext);
+    public void reroll(@Nullable ServerPlayerEntity pSender, ServerPlayerEntity pPlayer, boolean pNext) {
+
+        if (pSender != null) {
+            resetLocation(pSender, pPlayer, pNext);
+        } else {
+            resetLocation(pPlayer, pNext);
+        }
         resetData(pPlayer);
         resetInventory(pPlayer);
-//        pPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
     }
 
     public void resetInventory(ServerPlayerEntity pPlayer) {
@@ -69,15 +77,27 @@ public class RerollHandler {
     }
 
     public void resetLocation(ServerPlayerEntity pPlayer, boolean pNext) {
+        resetLocation(null, pPlayer, pNext);
+    }
+
+    public void resetLocation(@Nullable ServerPlayerEntity pSender, ServerPlayerEntity pPlayer, boolean pNext) {
 
         ServerWorld world;
         BlockPos newPosition;
 
         if (ConfigHandler.Common.useCurrentDim.get()) {
-            world = pPlayer.getLevel();
+            if (pSender != null) {
+                world = pSender.getLevel();
+            } else {
+                world = pPlayer.getLevel();
+            }
         } else {
             if (ConfigHandler.Common.useSpawnDim.get()) {
-                world = Objects.requireNonNull(pPlayer.getServer()).getLevel(pPlayer.getRespawnDimension());
+                if (pSender != null) {
+                    world = pSender.getServer().getLevel(pSender.getRespawnDimension());
+                } else {
+                    world = pPlayer.getServer().getLevel(pPlayer.getRespawnDimension());
+                }
             } else {
                 RegistryKey<World> worldRegistryKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(ConfigHandler.Common.overrideDim.get()));
                 world = Objects.requireNonNull(pPlayer.getServer()).getLevel(worldRegistryKey);
@@ -86,12 +106,9 @@ public class RerollHandler {
 
         newPosition = generateValidBlockPos(Objects.requireNonNull(world), pPlayer, pNext);
         pPlayer.teleportTo(world, newPosition.getX(), newPosition.getY() + 1.5d, newPosition.getZ(), 0, 0);
-        pPlayer.sendMessage(new StringTextComponent("New reroll position found."), pPlayer.getUUID());
     }
 
-    public BlockPos generateValidBlockPos(@NotNull ServerWorld pWorld, ServerPlayerEntity pPlayer, boolean pNext) {
-
-        pPlayer.sendMessage(new StringTextComponent("Searching for valid reroll position . . ."), pPlayer.getUUID());
+    public BlockPos generateValidBlockPos(@Nonnull ServerWorld pWorld, ServerPlayerEntity pPlayer, boolean pNext) {
 
         HOLDER.setSpiral(loadSpiral(pWorld));
         CompoundNBT spiral = HOLDER.getSpiral();
@@ -102,7 +119,9 @@ public class RerollHandler {
         int seaLevel = pWorld.getSeaLevel();
         boolean ceiling = pWorld.dimensionType().hasCeiling();
 
-        Optional<BlockPos> toReturn = BlockPos.findClosestMatch(new BlockPos(posX, ceiling ? (double) worldHeight / 2 : seaLevel, posZ), ceiling ? 8 : 32, ceiling ? worldHeight / 4 : 16, blockStatePredicate(pWorld));
+        pWorld.getProfiler().push("Block Position Validator");
+        Optional<BlockPos> toReturn = BlockPos.findClosestMatch(new BlockPos(posX, ceiling ? (double) worldHeight / 2 : seaLevel, posZ), ceiling ? 8 : 16, ceiling ? worldHeight / 4 : 32, blockStatePredicate(pWorld));
+        pWorld.getProfiler().pop();
 
         if (pNext) HOLDER.setNext();
         saveSpiral(pWorld, HOLDER.getSpiral());
@@ -133,5 +152,10 @@ public class RerollHandler {
         WorldSavedData savedData = WorldSavedData.getDataForWorld(world, "spiral");
         savedData.setData(pSpiral);
         savedData.setDirty();
+    }
+
+    public void setNext(ServerWorld pWorld) {
+        HOLDER.setNext();
+        saveSpiral(pWorld, HOLDER.getSpiral());
     }
 }
