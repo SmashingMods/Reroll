@@ -16,8 +16,10 @@ public class LocalizationDataGenerator extends LanguageProvider {
         add("reroll.dice.tooltip.description", "Use this item to reroll.");
         add("reroll.dice.tooltip.warning", "This can't be undone!");
         add("reroll.dice.cooldown", "Dice are on cooldown.");
+        add("reroll.death_event.player", "Oh no, you died! You were rerolled on death. Good luck!");
+        add("reroll.death_event.broadcast", "Oh no, %s died! Wish them luck on their new reroll.");
         add("commands.reroll.item_required", "You need dice to reroll.");
-        add("commands.reroll.self", "Well, here we go again ... But hey, if you don't like it, you can always reroll!");
+        add("commands.reroll.self", "You rerolled yourself. Good luck!");
         add("commands.reroll.self.lock", "Reroll locked.");
         add("commands.reroll.self.unlock", "Reroll unlocked. Be careful!");
         add("commands.reroll.self.locked", "Reroll locked. Use '/reroll unlock' to unlock yourself.");

@@ -20,8 +20,8 @@ import java.util.Objects;
 
 public class DiceItem extends Item {
 
-    public DiceItem(Item.Properties pProperties) {
-        super(pProperties);
+    public DiceItem() {
+        super(new Item.Properties().stacksTo(1).setNoRepair().durability(1).rarity(Rarity.RARE).fireResistant().tab(ItemGroup.TAB_MISC));
     }
 
     @Override

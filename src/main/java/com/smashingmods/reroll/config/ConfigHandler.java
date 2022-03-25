@@ -33,6 +33,7 @@ public class ConfigHandler {
         public static ForgeConfigSpec.BooleanValue rerollOnDeath;
         public static ForgeConfigSpec.BooleanValue startLocked;
         public static ForgeConfigSpec.IntValue cooldown;
+        public static ForgeConfigSpec.BooleanValue broadcastDeath;
 
         public Common(ForgeConfigSpec.Builder builder) {
             String seperator = System.getProperty("line.separator");
@@ -106,7 +107,7 @@ public class ConfigHandler {
                             "  Initial Inventory" + seperator +
                             "  Should players get an initial inventory when they first join a world?" +
                             seperator)
-                    .define("initialInventory", false);
+                    .define("initialInventory", true);
 
             setNewInventory = builder
                     .comment(seperator +
@@ -127,14 +128,14 @@ public class ConfigHandler {
                             "  Send Inventory to Chest" + seperator +
                             "  Should player inventory be dropped into a chest where they rerolled?" +
                             seperator)
-                    .define("sendInventoryToChest", false);
+                    .define("sendInventoryToChest", true);
 
             rerollOnDeath = builder
                     .comment(seperator +
                             "  Reroll On Death" + seperator +
                             "  Reroll players if they die to simulate a hardcore experience." +
                             seperator)
-                    .define("rerollOnDeath", false);
+                    .define("rerollOnDeath", true);
 
             startLocked = builder
                     .comment(seperator +
@@ -149,6 +150,14 @@ public class ConfigHandler {
                             "  Cooldown time in seconds to use reroll dice." +
                             seperator)
                     .defineInRange("cooldown", 1, 1, 60 * 60 * 24);
+
+            broadcastDeath = builder
+                    .comment(seperator +
+                            "  Broadcast Death to Server" +
+                            "  Should the server broadcast when a player died and was rerolled?" +
+                            "  Reroll On Death must be true." +
+                            seperator)
+                    .define("broadcastDeath", true);
 
             builder.pop();
         }

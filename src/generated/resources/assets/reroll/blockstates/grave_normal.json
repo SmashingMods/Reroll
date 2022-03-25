@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "reroll:block/grave"
+    },
+    "facing=south": {
+      "model": "reroll:block/grave",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "reroll:block/grave",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "reroll:block/grave",
+      "y": 90
+    }
+  }
+}

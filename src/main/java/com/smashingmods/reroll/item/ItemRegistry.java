@@ -2,19 +2,21 @@ package com.smashingmods.reroll.item;
 
 import com.smashingmods.reroll.Reroll;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.Rarity;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.ObjectHolder;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ItemRegistry {
 
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Reroll.MODID);
-    public static final RegistryObject<Item> DICE_ITEM = ITEMS.register("dice", () -> new DiceItem(new Item.Properties().stacksTo(1).setNoRepair().durability(1).rarity(Rarity.EPIC).fireResistant().tab(ItemGroup.TAB_MISC)));
+    @ObjectHolder(Reroll.MODID + ":dice")
+    public static DiceItem DICE_ITEM;
 
-    public static void register(IEventBus eventBus) {
-        ITEMS.register(eventBus);
+    @SubscribeEvent
+    public static void registerItems(RegistryEvent.Register<Item> event) {
+        IForgeRegistry<Item> registry = event.getRegistry();
+        registry.register(new DiceItem().setRegistryName(Reroll.MODID, "dice"));
     }
 }
