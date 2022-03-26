@@ -1,9 +1,8 @@
-# Changes
-- Added new feature to require the dice to reroll.
-- Added new Dice image.
-- Adjusted reroll y position to potentially prevent players from being partially inside a block when they reroll.
+# Initial 1.16.5 Release
+Note that there might be some bugs or issues that need to be ironed out. There currently no built in mod support. I will be adding support for some must have mods like Curios soon.
 
-# Fixes
-- Fixed dice rerolling twice.
-- Fixed being on fire after reroll if you were on fire (it's not perfect as lag will still make it possible).
-- Fixed reroll on death incorrectly having 'true' set in code for testing.
+# Changes
+- New Dice model.
+- New config options.
+- New grave block.
+- Massively improved codebase. 1.12.2 is a mess.
