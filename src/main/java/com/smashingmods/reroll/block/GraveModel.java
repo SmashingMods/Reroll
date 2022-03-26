@@ -14,6 +14,7 @@ public enum GraveModel implements IStringSerializable {
         this.name = name;
     }
 
+    @SuppressWarnings("unused")
     public static GraveModel getModel(int id) {
         return id >= 0 && id < values().length ? values()[id] : getDefault();
     }

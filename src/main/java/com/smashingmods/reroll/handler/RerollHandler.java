@@ -9,6 +9,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -41,12 +42,15 @@ public class RerollHandler {
         } else {
             resetLocation(pPlayer, pNext);
         }
+        resetTimeAndWeather(pPlayer);
         resetData(pPlayer);
     }
 
     public void resetInventory(ServerPlayerEntity pPlayer) {
         if (!ConfigHandler.Common.createGraveOnReroll.get()) {
-            pPlayer.inventory.clearContent();
+            if (ConfigHandler.Common.wipeCurrentInventory.get()) {
+                pPlayer.inventory.clearContent();
+            }
             if (ConfigHandler.Common.setNewInventory.get()) {
                 RerollUtilities.setInventory(pPlayer);
             }
@@ -55,31 +59,45 @@ public class RerollHandler {
             if (!ConfigHandler.Common.rerollOnDeath.get()) GraveHandler.handleGrave(pPlayer);
         }
 
-        if (ConfigHandler.Common.resetEnderChest.get()) pPlayer.getEnderChestInventory().clearContent();
+        if (ConfigHandler.Common.resetEnderChest.get()) {
+            pPlayer.getEnderChestInventory().clearContent();
+        }
         pPlayer.doCloseContainer();
     }
 
     public void resetData(ServerPlayerEntity pPlayer) {
 
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+
         pPlayer.clearFire();
         pPlayer.setHealth(pPlayer.getMaxHealth());
         pPlayer.setAirSupply(pPlayer.getMaxAirSupply());
         pPlayer.getFoodData().setFoodLevel(20);
-        pPlayer.getFoodData().setSaturation(10);
-        pPlayer.setExperiencePoints(0);
         pPlayer.setAbsorptionAmount(0.0f);
         pPlayer.removeAllEffects();
         pPlayer.setArrowCount(0);
-        pPlayer.setScore(0);
-        pPlayer.setGlowing(false);
-        pPlayer.setInvisible(false);
         pPlayer.setJumping(false);
         pPlayer.stopRiding();
         pPlayer.stopFallFlying();
         pPlayer.stopSleeping();
         pPlayer.stopUsingItem();
 
-        pPlayer.getServer().getCommands().performCommand(ServerLifecycleHooks.getCurrentServer().createCommandSourceStack(), String.format("/advancement revoke %s everything", pPlayer.getName().getContents()));
+        if (ConfigHandler.Common.resetExperience.get()) {
+            pPlayer.setExperiencePoints(0);
+        }
+        if (ConfigHandler.Common.resetAdvancements.get()) {
+            server.getCommands().performCommand(server.createCommandSourceStack(), String.format("/advancement revoke %s everything", pPlayer.getName().getContents()));
+        }
+    }
+
+    public void resetTimeAndWeather(ServerPlayerEntity pPlayer) {
+        if (ConfigHandler.Common.resetTimeAndWeather.get()) {
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            if (server.isSingleplayer()) {
+                pPlayer.getLevel().setDayTime(1000);
+                pPlayer.getLevel().setWeatherParameters(6000, 0, false, false);
+            }
+        }
     }
 
     public void resetLocation(ServerPlayerEntity pPlayer, boolean pNext) {
@@ -100,9 +118,9 @@ public class RerollHandler {
         } else {
             if (ConfigHandler.Common.useSpawnDim.get()) {
                 if (pSender != null) {
-                    world = pSender.getServer().getLevel(pSender.getRespawnDimension());
+                    world = Objects.requireNonNull(pSender.getServer()).getLevel(pSender.getRespawnDimension());
                 } else {
-                    world = pPlayer.getServer().getLevel(pPlayer.getRespawnDimension());
+                    world = Objects.requireNonNull(pPlayer.getServer()).getLevel(pPlayer.getRespawnDimension());
                 }
             } else {
                 RegistryKey<World> worldRegistryKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(ConfigHandler.Common.overrideDim.get()));
@@ -110,7 +128,7 @@ public class RerollHandler {
             }
         }
 
-        newPosition = generateValidBlockPos(Objects.requireNonNull(world), pPlayer, pNext);
+        newPosition = generateValidBlockPos(Objects.requireNonNull(world), pNext);
         pPlayer.teleportTo(world, newPosition.getX(), newPosition.getY() + 1.5d, newPosition.getZ(), 0, 0);
         pPlayer.getLevel().setDefaultSpawnPos(newPosition, 0);
         if (pPlayer.getRespawnPosition() != null) {
@@ -118,7 +136,7 @@ public class RerollHandler {
         }
     }
 
-    public BlockPos generateValidBlockPos(@Nonnull ServerWorld pWorld, ServerPlayerEntity pPlayer, boolean pNext) {
+    public BlockPos generateValidBlockPos(@Nonnull ServerWorld pWorld, boolean pNext) {
 
         HOLDER.setSpiral(loadSpiral(pWorld));
         CompoundNBT spiral = HOLDER.getSpiral();
@@ -136,7 +154,7 @@ public class RerollHandler {
         if (pNext) HOLDER.setNext();
         saveSpiral(pWorld, HOLDER.getSpiral());
 
-        return toReturn.orElseGet(() -> generateValidBlockPos(pWorld, pPlayer, pNext));
+        return toReturn.orElseGet(() -> generateValidBlockPos(pWorld, true));
     }
 
     public Predicate<BlockPos> blockStatePredicate(ServerWorld pWorld) {

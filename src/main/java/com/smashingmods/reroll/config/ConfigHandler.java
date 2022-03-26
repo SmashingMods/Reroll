@@ -19,22 +19,35 @@ public class ConfigHandler {
 
     public static class Common {
 
-        public static ForgeConfigSpec.BooleanValue requireItem;
-        public static ForgeConfigSpec.ConfigValue<List<? extends String>> rerollItems;
+        // General Configuration
         public static ForgeConfigSpec.IntValue minDistance;
-        public static ForgeConfigSpec.BooleanValue rerollAllTogether;
         public static ForgeConfigSpec.BooleanValue useCurrentDim;
         public static ForgeConfigSpec.BooleanValue useSpawnDim;
         public static ForgeConfigSpec.ConfigValue<String> overrideDim;
+        public static ForgeConfigSpec.BooleanValue rerollOnDeath;
+        public static ForgeConfigSpec.BooleanValue broadcastDeath;
+        public static ForgeConfigSpec.BooleanValue resetTimeAndWeather;
+
+        // Inventory Configuration
+        public static ForgeConfigSpec.BooleanValue wipeCurrentInventory;
+        public static ForgeConfigSpec.ConfigValue<List<? extends String>> rerollItems;
         public static ForgeConfigSpec.BooleanValue initialInventory;
         public static ForgeConfigSpec.BooleanValue setNewInventory;
         public static ForgeConfigSpec.BooleanValue resetEnderChest;
         public static ForgeConfigSpec.BooleanValue createGraveOnDeath;
-        public static ForgeConfigSpec.BooleanValue createGraveOnReroll;
-        public static ForgeConfigSpec.BooleanValue rerollOnDeath;
-        public static ForgeConfigSpec.BooleanValue startLocked;
+
+        // Data Configuration
+        public static ForgeConfigSpec.BooleanValue resetExperience;
+        public static ForgeConfigSpec.BooleanValue resetAdvancements;
+
+        // Dice Configuration
+        public static ForgeConfigSpec.BooleanValue requireItem;
         public static ForgeConfigSpec.IntValue cooldown;
-        public static ForgeConfigSpec.BooleanValue broadcastDeath;
+
+        // Command Configuration
+        public static ForgeConfigSpec.BooleanValue startLocked;
+        public static ForgeConfigSpec.BooleanValue rerollAllTogether;
+        public static ForgeConfigSpec.BooleanValue createGraveOnReroll;
 
         public Common(ForgeConfigSpec.Builder builder) {
 
@@ -82,14 +95,31 @@ public class ConfigHandler {
 
             broadcastDeath = builder
                     .comment(seperator +
-                            "  Broadcast Death to Server" +
-                            "  Should the server broadcast when a player died and was rerolled?" +
+                            "  Broadcast Death to Server" + seperator +
+                            "  Should the server broadcast when a player died and was rerolled?" + seperator +
                             "  Reroll On Death must be true." +
                             seperator)
                     .define("broadcastDeath", true);
 
+            resetTimeAndWeather = builder
+                    .comment(seperator +
+                            "  Reset Time and Weather on Reroll" + seperator +
+                            "  This option is only available in single player." + seperator +
+                            "  Wouldn't want to reset this for all players!" +
+                            seperator)
+                        .define("resetTimeAndWeather", true);
+
             builder.pop();
             builder.push("Reroll Inventory Configuration");
+
+            wipeCurrentInventory = builder
+                    .comment(seperator +
+                            "  Wipe Current Inventory" + seperator +
+                            "  Enable to wipe the player's inventory (or send to grave) on reroll or death." + seperator +
+                            "  If send to grave is enabled, inventory will go to a grave." + seperator +
+                            "  If disabled, the player will keep their inventory." +
+                            seperator)
+                    .define("wipeCurrentInventory", true);
 
             Vector<String> itemsVector = new Vector<>();
             itemsVector.add("reroll:dice;1");
@@ -134,17 +164,27 @@ public class ConfigHandler {
             createGraveOnDeath = builder
                     .comment(seperator +
                             "  Send Inventory to Chest" + seperator +
-                            "  Set this to create a grave when you die." +
+                            "  Set this to create a grave when you die." + seperator +
                             "  Also works with reroll on death." +
                             seperator)
                     .define("createGraveOnDeath", true);
 
-            createGraveOnReroll = builder
+            builder.pop();
+            builder.push("Data Configuration");
+
+            resetExperience = builder
                     .comment(seperator +
-                            "  Send Inventory to Chest" + seperator +
-                            "  Set this to create a grave when you reroll." +
+                            "  Reset Experience on Reroll" + seperator +
+                            "  Should player experience reset when they are rerolled?" +
                             seperator)
-                    .define("createGraveOnReroll", true);
+                    .define("resetExperience", true);
+
+            resetAdvancements = builder
+                    .comment(seperator +
+                            "  Reset Advancements on Reroll" + seperator +
+                            "  Should player advancements be reset when they are rerolled?" +
+                            seperator)
+                    .define("resetAdvancements", true);
 
             builder.pop();
             builder.push("Dice Configuration");
@@ -172,6 +212,13 @@ public class ConfigHandler {
                             "  This is a safety feature to lock the use of reroll at the start. Users are required to use /reroll unlock to use reroll just in case." +
                             seperator)
                     .define("startLocked", true);
+
+            createGraveOnReroll = builder
+                    .comment(seperator +
+                            "  Send Inventory to Chest" + seperator +
+                            "  Set this to create a grave when you reroll." +
+                            seperator)
+                    .define("createGraveOnReroll", true);
 
             rerollAllTogether = builder
                     .comment(seperator +

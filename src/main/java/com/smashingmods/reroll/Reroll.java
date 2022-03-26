@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(Reroll.MODID)
 public class Reroll {
     public static final String MODID = "reroll";
+    @SuppressWarnings("unused")
     public static final Logger LOGGER = LogManager.getLogger();
 
     public Reroll() {

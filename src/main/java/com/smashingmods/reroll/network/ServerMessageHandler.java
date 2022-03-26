@@ -16,7 +16,7 @@ public class ServerMessageHandler {
         context.get().enqueueWork(() -> {
             ServerPlayerEntity sender = context.get().getSender();
             RerollHandler handler = new RerollHandler();
-            CooldownTracker tracker = sender.getCooldowns();
+            CooldownTracker tracker = Objects.requireNonNull(sender).getCooldowns();
             Item item = message.getItemStack().getItem();
 
             if (tracker.isOnCooldown(item)) {

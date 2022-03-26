@@ -78,6 +78,7 @@ public class DiceItem extends Item {
     }
 
     @Override
+    @Nonnull
     public SoundEvent getDrinkingSound() {
         return SoundEvents.SPIDER_STEP;
     }

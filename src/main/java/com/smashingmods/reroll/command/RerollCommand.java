@@ -175,10 +175,8 @@ public class RerollCommand {
 
                     if (ConfigHandler.Common.rerollAllTogether.get()) {
                         HANDLER.reroll(player, false);
-
                     } else {
                         HANDLER.reroll(sender, player, true);
-                        HANDLER.setNext(sender.getLevel());
                     }
 
                     if (sender.getUUID() != player.getUUID()) {
@@ -188,6 +186,9 @@ public class RerollCommand {
                 } else {
                     sender.sendMessage(new TranslationTextComponent("commands.reroll.player.locked").withStyle(TextFormatting.RED), sender.getUUID());
                 }
+            }
+            if (ConfigHandler.Common.rerollAllTogether.get()) {
+                HANDLER.setNext(sender.getLevel());
             }
         } catch (IllegalAccessException | CommandSyntaxException e) {
             e.printStackTrace();
