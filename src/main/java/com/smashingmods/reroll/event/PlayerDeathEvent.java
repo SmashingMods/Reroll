@@ -33,24 +33,24 @@ import java.util.UUID;
 public class LivingDeathEvent {
 
     @SubscribeEvent
-    public static void onLivingDeathEvent(@Nonnull LivingDamageEvent event) {
+    public static void onLivingDeathEvent(@Nonnull net.minecraftforge.event.entity.living.LivingDeathEvent event) {
         if (event.getEntity() instanceof PlayerEntity && ConfigHandler.Common.rerollOnDeath.get()) {
             RerollHandler handler = new RerollHandler();
             PlayerEntity player = (PlayerEntity) event.getEntity();
-            float amount = event.getAmount();
-            float health = player.getHealth();
+//            float amount = event.getAmount();
+//            float health = player.getHealth();
 
-            if (amount > health) {
+//            if (amount > health) {
                 event.setCanceled(true);
-                if (ConfigHandler.Common.sendInventoryToChest.get()) handleGrave(player);
-                handler.reroll((ServerPlayerEntity) player, true);
+                if (ConfigHandler.Common.createGrave.get()) handleGrave(player);
+//                handler.reroll((ServerPlayerEntity) player, true);
                 player.sendMessage(new TranslationTextComponent("reroll.death_event.player").withStyle(TextFormatting.RED), player.getUUID());
 
                 MinecraftServer server = player.getServer();
                 if (server != null && !server.isSingleplayer() && ConfigHandler.Common.broadcastDeath.get()) {
                     server.getPlayerList().broadcastMessage(new TranslationTextComponent("reroll.death_event.broadcast", player.getName()).withStyle(TextFormatting.RED), ChatType.SYSTEM, UUID.randomUUID());
                 }
-            }
+//            }
         }
     }
 
