@@ -8,6 +8,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class RerollUtilities {
+
     public static void setInventory(PlayerEntity pPlayer) {
         for (String configString : ConfigHandler.Common.rerollItems.get()) {
             String itemName = configString.split(";")[0];

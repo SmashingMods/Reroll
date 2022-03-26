@@ -5,6 +5,7 @@ import com.smashingmods.reroll.config.ConfigHandler;
 import com.smashingmods.reroll.model.Spiral;
 import com.smashingmods.reroll.util.RerollUtilities;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -12,9 +13,9 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,22 +35,25 @@ public class RerollHandler {
 
     public void reroll(@Nullable ServerPlayerEntity pSender, ServerPlayerEntity pPlayer, boolean pNext) {
 
+        resetInventory(pPlayer);
         if (pSender != null) {
             resetLocation(pSender, pPlayer, pNext);
         } else {
             resetLocation(pPlayer, pNext);
         }
         resetData(pPlayer);
-        resetInventory(pPlayer);
     }
 
     public void resetInventory(ServerPlayerEntity pPlayer) {
-        if (!ConfigHandler.Common.sendInventoryToChest.get()) {
+        if (!ConfigHandler.Common.createGraveOnReroll.get()) {
             pPlayer.inventory.clearContent();
             if (ConfigHandler.Common.setNewInventory.get()) {
                 RerollUtilities.setInventory(pPlayer);
             }
-        }  // send to chest
+        }  else {
+            // If reroll on death was set, the player death event would have already placed a grave.
+            if (!ConfigHandler.Common.rerollOnDeath.get()) GraveHandler.handleGrave(pPlayer);
+        }
 
         if (ConfigHandler.Common.resetEnderChest.get()) pPlayer.getEnderChestInventory().clearContent();
         pPlayer.doCloseContainer();
@@ -74,6 +78,8 @@ public class RerollHandler {
         pPlayer.stopFallFlying();
         pPlayer.stopSleeping();
         pPlayer.stopUsingItem();
+
+        pPlayer.getServer().getCommands().performCommand(ServerLifecycleHooks.getCurrentServer().createCommandSourceStack(), String.format("/advancement revoke %s everything", pPlayer.getName().getContents()));
     }
 
     public void resetLocation(ServerPlayerEntity pPlayer, boolean pNext) {
@@ -106,6 +112,10 @@ public class RerollHandler {
 
         newPosition = generateValidBlockPos(Objects.requireNonNull(world), pPlayer, pNext);
         pPlayer.teleportTo(world, newPosition.getX(), newPosition.getY() + 1.5d, newPosition.getZ(), 0, 0);
+        pPlayer.getLevel().setDefaultSpawnPos(newPosition, 0);
+        if (pPlayer.getRespawnPosition() != null) {
+            pPlayer.getLevel().setBlock(pPlayer.getRespawnPosition(), Blocks.AIR.defaultBlockState(), 2);
+        }
     }
 
     public BlockPos generateValidBlockPos(@Nonnull ServerWorld pWorld, ServerPlayerEntity pPlayer, boolean pNext) {

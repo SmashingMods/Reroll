@@ -29,40 +29,18 @@ public class ConfigHandler {
         public static ForgeConfigSpec.BooleanValue initialInventory;
         public static ForgeConfigSpec.BooleanValue setNewInventory;
         public static ForgeConfigSpec.BooleanValue resetEnderChest;
-        public static ForgeConfigSpec.BooleanValue sendInventoryToChest;
+        public static ForgeConfigSpec.BooleanValue createGraveOnDeath;
+        public static ForgeConfigSpec.BooleanValue createGraveOnReroll;
         public static ForgeConfigSpec.BooleanValue rerollOnDeath;
         public static ForgeConfigSpec.BooleanValue startLocked;
         public static ForgeConfigSpec.IntValue cooldown;
         public static ForgeConfigSpec.BooleanValue broadcastDeath;
 
         public Common(ForgeConfigSpec.Builder builder) {
+
             String seperator = System.getProperty("line.separator");
-            builder.push("Reroll Command Configuration");
-            requireItem = builder
-                    .comment(seperator +
-                            "  Require Item" + seperator +
-                            "  Using Reroll requires Reroll Dice. Disables the /reroll command for non-OP players." +
-                            seperator)
-                    .define("requireItem", true);
 
-            Vector<String> itemsVector = new Vector<>();
-            itemsVector.add("reroll:dice;1");
-
-            rerollItems = builder
-                    .comment(seperator +
-                            "  Reroll Items" + seperator +
-                            "  A list of items that will be added to a player's inventory after using the reroll command." + seperator +
-                            "  You can add any existing item per line like this: \"minecraft:torch;16\"." + seperator +
-                            "  Note that you can only have as many items as there are inventory slots." +
-                            seperator)
-                    .defineList("rerollItems", itemsVector, configItem -> {
-                        if (configItem instanceof String) {
-                            String name = ((String) configItem).split(";")[0];
-                            int count = Integer.parseInt(((String) configItem).split(";")[1]);
-                            return ResourceLocation.tryParse(name) != null && count > 0 && count <= 64;
-                        }
-                        return false;
-                    });
+            builder.push("General Configuration");
 
             minDistance = builder
                     .comment(seperator +
@@ -70,13 +48,6 @@ public class ConfigHandler {
                             "  Determines the minimum distance to teleport when you reroll." +
                             seperator)
                     .defineInRange("minDistance", 512, 256, 10240);
-
-            rerollAllTogether = builder
-                    .comment(seperator +
-                            "  Reroll All Together" + seperator +
-                            "  Should '/reroll all' send all players to the same location?" +
-                            seperator)
-                    .define("rerollAllTogether", true);
 
             useCurrentDim = builder
                     .comment(seperator +
@@ -102,6 +73,27 @@ public class ConfigHandler {
                             seperator)
                     .define("overrideDim", "minecraft:overworld");
 
+            rerollOnDeath = builder
+                    .comment(seperator +
+                            "  Reroll On Death" + seperator +
+                            "  Reroll players if they die to simulate a hardcore experience." +
+                            seperator)
+                    .define("rerollOnDeath", true);
+
+            broadcastDeath = builder
+                    .comment(seperator +
+                            "  Broadcast Death to Server" +
+                            "  Should the server broadcast when a player died and was rerolled?" +
+                            "  Reroll On Death must be true." +
+                            seperator)
+                    .define("broadcastDeath", true);
+
+            builder.pop();
+            builder.push("Reroll Inventory Configuration");
+
+            Vector<String> itemsVector = new Vector<>();
+            itemsVector.add("reroll:dice;1");
+
             initialInventory = builder
                     .comment(seperator +
                             "  Initial Inventory" + seperator +
@@ -116,6 +108,22 @@ public class ConfigHandler {
                             seperator)
                     .define("setNewInventory", true);
 
+            rerollItems = builder
+                    .comment(seperator +
+                            "  Reroll Items" + seperator +
+                            "  A list of items that will be added to a player's inventory after using the reroll command." + seperator +
+                            "  You can add any existing item per line like this: \"minecraft:torch;16\"." + seperator +
+                            "  Note that you can only have as many items as there are inventory slots." +
+                            seperator)
+                    .defineList("rerollItems", itemsVector, configItem -> {
+                        if (configItem instanceof String) {
+                            String name = ((String) configItem).split(";")[0];
+                            int count = Integer.parseInt(((String) configItem).split(";")[1]);
+                            return ResourceLocation.tryParse(name) != null && count > 0 && count <= 64;
+                        }
+                        return false;
+                    });
+
             resetEnderChest = builder
                     .comment(seperator +
                             "  Reset Ender Chest" + seperator +
@@ -123,19 +131,40 @@ public class ConfigHandler {
                             seperator)
                     .define("resetEnderChest", true);
 
-            sendInventoryToChest = builder
+            createGraveOnDeath = builder
                     .comment(seperator +
                             "  Send Inventory to Chest" + seperator +
-                            "  Should player inventory be dropped into a chest where they rerolled?" +
+                            "  Set this to create a grave when you die." +
+                            "  Also works with reroll on death." +
                             seperator)
-                    .define("sendInventoryToChest", true);
+                    .define("createGraveOnDeath", true);
 
-            rerollOnDeath = builder
+            createGraveOnReroll = builder
                     .comment(seperator +
-                            "  Reroll On Death" + seperator +
-                            "  Reroll players if they die to simulate a hardcore experience." +
+                            "  Send Inventory to Chest" + seperator +
+                            "  Set this to create a grave when you reroll." +
                             seperator)
-                    .define("rerollOnDeath", true);
+                    .define("createGraveOnReroll", true);
+
+            builder.pop();
+            builder.push("Dice Configuration");
+
+            requireItem = builder
+                    .comment(seperator +
+                            "  Require Item" + seperator +
+                            "  Using Reroll requires Reroll Dice. Disables the /reroll command for non-OP players." +
+                            seperator)
+                    .define("requireItem", true);
+
+            cooldown = builder
+                    .comment(seperator +
+                            "  Cooldown" + seperator +
+                            "  Cooldown time in seconds to use reroll dice." +
+                            seperator)
+                    .defineInRange("cooldown", 60, 30, 60 * 60 * 24);
+
+            builder.pop();
+            builder.push("Reroll Command Configuration");
 
             startLocked = builder
                     .comment(seperator +
@@ -144,20 +173,12 @@ public class ConfigHandler {
                             seperator)
                     .define("startLocked", true);
 
-            cooldown = builder
+            rerollAllTogether = builder
                     .comment(seperator +
-                            "  Cooldown" + seperator +
-                            "  Cooldown time in seconds to use reroll dice." +
+                            "  Reroll All Together" + seperator +
+                            "  Should '/reroll all' send all players to the same location?" +
                             seperator)
-                    .defineInRange("cooldown", 1, 1, 60 * 60 * 24);
-
-            broadcastDeath = builder
-                    .comment(seperator +
-                            "  Broadcast Death to Server" +
-                            "  Should the server broadcast when a player died and was rerolled?" +
-                            "  Reroll On Death must be true." +
-                            seperator)
-                    .define("broadcastDeath", true);
+                    .define("rerollAllTogether", true);
 
             builder.pop();
         }

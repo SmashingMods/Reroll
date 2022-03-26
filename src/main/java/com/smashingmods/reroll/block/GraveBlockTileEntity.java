@@ -25,7 +25,7 @@ public class GraveBlockTileEntity extends TileEntity  {
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(this::createHandler);
 
     public GraveBlockTileEntity() {
-        super(BlockRegistry.GRAVE_TILE);
+        super(BlockRegistry.GRAVE_TILE.get());
     }
 
     @Nonnull

@@ -26,7 +26,7 @@ public class BlockStateGenerator extends BlockStateProvider {
 
     private void registerGraveBlock() {
         ModelFile modelFile = new ModelFile.ExistingModelFile(modLoc("block/grave"), fileHelper);
-        getVariantBuilder(BlockRegistry.GRAVE_NORMAL).forAllStates(state -> {
+        getVariantBuilder(BlockRegistry.GRAVE_NORMAL.get()).forAllStates(state -> {
             Direction direction = state.getValue(HorizontalFaceBlock.FACING);
             return ConfiguredModel.builder()
                     .modelFile(modelFile)

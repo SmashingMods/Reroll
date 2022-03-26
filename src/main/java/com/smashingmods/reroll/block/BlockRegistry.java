@@ -3,31 +3,21 @@ package com.smashingmods.reroll.block;
 import com.smashingmods.reroll.Reroll;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BlockRegistry {
 
-    @ObjectHolder(Reroll.MODID + ":grave_normal")
-    public static GraveBlock GRAVE_NORMAL;
+    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Reroll.MODID);
+    private static final DeferredRegister<TileEntityType<?>> TILE_ENTITIES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, Reroll.MODID);
 
-    @ObjectHolder(Reroll.MODID + ":grave")
-    public static TileEntityType<GraveBlockTileEntity> GRAVE_TILE;
+    public static final RegistryObject<Block> GRAVE_NORMAL = BLOCKS.register("grave_normal", () -> new GraveBlock(GraveModel.GRAVE_NORMAL));
+    public static final RegistryObject<TileEntityType<?>> GRAVE_TILE = TILE_ENTITIES.register("grave_tile", () -> TileEntityType.Builder.of(GraveBlockTileEntity::new, new GraveBlock[] { (GraveBlock) GRAVE_NORMAL.get() }).build(null));
 
-    @SubscribeEvent
-    public static void registerBlocks(RegistryEvent.Register<Block> event) {
-        IForgeRegistry<Block> registry = event.getRegistry();
-        registry.register(new GraveBlock(GraveModel.GRAVE_NORMAL).setRegistryName("grave_normal"));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @SubscribeEvent
-    public static void onTileEntityRegistry(RegistryEvent.Register<TileEntityType<?>> event) {
-        IForgeRegistry<TileEntityType<?>> registry = event.getRegistry();
-        registry.register(TileEntityType.Builder.of(GraveBlockTileEntity::new, new GraveBlock[] { BlockRegistry.GRAVE_NORMAL }).build(null).setRegistryName("grave"));
+    public static void register() {
+        BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        TILE_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }

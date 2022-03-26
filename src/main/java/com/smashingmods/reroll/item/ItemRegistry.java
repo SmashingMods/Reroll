@@ -2,21 +2,20 @@ package com.smashingmods.reroll.item;
 
 import com.smashingmods.reroll.Reroll;
 import net.minecraft.item.Item;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ItemRegistry {
 
-    @ObjectHolder(Reroll.MODID + ":dice")
-    public static DiceItem DICE_ITEM;
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Reroll.MODID);
+    public static final RegistryObject<Item> DICE_ITEM = ITEMS.register("dice", DiceItem::new);
 
-    @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        IForgeRegistry<Item> registry = event.getRegistry();
-        registry.register(new DiceItem().setRegistryName(Reroll.MODID, "dice"));
+    public static void register() {
+        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }

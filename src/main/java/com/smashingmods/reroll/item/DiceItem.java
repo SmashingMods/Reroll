@@ -5,6 +5,7 @@ import com.smashingmods.reroll.capability.RerollCapabilityImplementation;
 import com.smashingmods.reroll.network.RerollPacket;
 import com.smashingmods.reroll.network.RerollPacketHandler;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.*;
@@ -27,25 +28,31 @@ public class DiceItem extends Item {
     @Override
     @Nonnull
     public ActionResult<ItemStack> use(@Nonnull World pLevel, @Nonnull PlayerEntity pPlayer, @Nonnull Hand pHand) {
-        boolean clientSide = pLevel.isClientSide;
-        if (clientSide) {
-            try {
-                RerollCapabilityImplementation rerollCapability = pPlayer.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
-                if (!rerollCapability.getLock()) {
-                    RerollPacketHandler.INSTANCE.sendToServer(new RerollPacket(getItemStack()));
-                    pPlayer.sendMessage(new TranslationTextComponent("commands.reroll.self").withStyle(TextFormatting.AQUA), pPlayer.getUUID());
-                    return ActionResult.success(getItemStack());
-                } else {
-                    pPlayer.sendMessage(new TranslationTextComponent("commands.reroll.self.locked").withStyle(TextFormatting.RED), pPlayer.getUUID());
-                    return ActionResult.fail(getItemStack());
+        pPlayer.startUsingItem(pHand);
+        return ActionResult.sidedSuccess(getItemStack(), pLevel.isClientSide);
+    }
+
+    @Override
+    public void releaseUsing(@Nonnull ItemStack pStack, @Nonnull World pLevel, @Nonnull LivingEntity pEntityLiving, int pTimeLeft) {
+        if (pTimeLeft <= 55) {
+            if (pEntityLiving instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) pEntityLiving;
+                player.stopUsingItem();
+                if (pLevel.isClientSide) {
+                    try {
+                        RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
+                        if (!rerollCapability.getLock()) {
+                            RerollPacketHandler.INSTANCE.sendToServer(new RerollPacket(getItemStack()));
+                            player.sendMessage(new TranslationTextComponent("commands.reroll.self").withStyle(TextFormatting.AQUA), player.getUUID());
+                        } else {
+                            player.sendMessage(new TranslationTextComponent("commands.reroll.self.locked").withStyle(TextFormatting.RED), player.getUUID());
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
             }
-        } else {
-            return ActionResult.pass(getItemStack());
         }
-        return ActionResult.fail(getItemStack());
     }
 
     @Override
@@ -67,7 +74,12 @@ public class DiceItem extends Item {
     @Override
     @Nonnull
     public UseAction getUseAnimation(@Nonnull ItemStack pStack) {
-        return UseAction.BOW;
+        return UseAction.DRINK;
+    }
+
+    @Override
+    public SoundEvent getDrinkingSound() {
+        return SoundEvents.SPIDER_STEP;
     }
 
     @Override
@@ -78,7 +90,7 @@ public class DiceItem extends Item {
 
     @Override
     public int getUseDuration(@Nonnull ItemStack pStack) {
-        return 0;
+        return 60;
     }
 
     @Override
