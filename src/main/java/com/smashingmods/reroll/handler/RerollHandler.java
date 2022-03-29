@@ -5,22 +5,22 @@ import arekkuusu.enderskills.api.capability.Capabilities;
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
 import com.smashingmods.reroll.Reroll;
+import com.smashingmods.reroll.capability.WorldSavedData;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.item.DiceItem;
-import com.smashingmods.reroll.model.RerollObject;
-import com.smashingmods.reroll.model.SpiralObject;
+import com.smashingmods.reroll.model.Spiral;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.server.command.CommandSetDimension;
@@ -31,14 +31,11 @@ import timeisup.network.PacketHandler;
 import timeisup.network.TimerPacket;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.util.*;
 
 public class RerollHandler {
 
-    private final String SEPARATOR = System.getProperty("file.separator");
-    private RerollObject CURRENT;
-    private SpiralObject SPIRAL;
+    private final Spiral HOLDER = new Spiral();
 
     public RerollHandler() {}
 
@@ -48,23 +45,6 @@ public class RerollHandler {
 
     public void reroll(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next, @Nullable Item usedItem) {
 
-        String worldPath;
-        if (server.isDedicatedServer()) {
-            worldPath = server.getDataDirectory() + SEPARATOR + server.getFolderName();
-        } else {
-            worldPath = server.getDataDirectory() + SEPARATOR + "saves" + SEPARATOR + server.getWorldName();
-        }
-
-        Reroll.MAPPER.setFile(new File(worldPath, "reroll_position.json"));
-        CURRENT = Reroll.MAPPER.readFile(RerollObject.class);
-        if (CURRENT == null) CURRENT = new RerollObject();
-
-        if (CURRENT.containsDimension(entityPlayer.dimension)) {
-            SPIRAL = CURRENT.getDimensionObjectByID(entityPlayer.dimension).getSpiral();
-        } else {
-            CURRENT.addDimension(entityPlayer.dimension);
-        }
-
         resetInventory(entityPlayer);
         server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", entityPlayer.getName()));
         resetLocation(server, entityPlayer, next);
@@ -73,7 +53,6 @@ public class RerollHandler {
         }
         resetData(entityPlayer);
         resetModData(server, entityPlayer);
-        entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
 
         if (usedItem instanceof DiceItem) {
             CooldownTracker tracker = entityPlayer.getCooldownTracker();
@@ -103,9 +82,7 @@ public class RerollHandler {
             return positionList;
         } else {
             List<BlockPos> positionList = new ArrayList<>();
-            directions.forEach(direction -> {
-                positionList.addAll(generateValidChestPosition(world, direction));
-            });
+            directions.forEach(direction -> positionList.addAll(generateValidChestPosition(world, direction)));
             return positionList;
         }
     }
@@ -120,8 +97,8 @@ public class RerollHandler {
             chestPositions.forEach(pos -> {
                 world.setBlockState(pos, Blocks.CHEST.getDefaultState());
                 for (int slot = 0; slot < 27; slot++) {
-                    IItemHandler capability = world.getTileEntity(pos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN);
-                    capability.insertItem(slot, entityPlayer.inventory.getStackInSlot(count[0]), false);
+                    IItemHandler capability = Objects.requireNonNull(world.getTileEntity(pos)).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN);
+                    Objects.requireNonNull(capability).insertItem(slot, entityPlayer.inventory.getStackInSlot(count[0]), false);
                     entityPlayer.inventory.removeStackFromSlot(count[0]);
                     count[0]++;
                 }
@@ -138,8 +115,6 @@ public class RerollHandler {
 
     public void resetData(EntityPlayerMP entityPlayer) {
 
-        entityPlayer.setFire(0);
-        entityPlayer.extinguish();
         entityPlayer.setHealth(entityPlayer.getMaxHealth());
         entityPlayer.setAir(300);
         entityPlayer.getFoodStats().setFoodLevel(20);
@@ -154,6 +129,8 @@ public class RerollHandler {
         entityPlayer.stopActiveHand();
         entityPlayer.removePassengers();
         entityPlayer.dismountRidingEntity();
+        entityPlayer.setFire(0);
+        entityPlayer.extinguish();
     }
 
     public void resetModData(MinecraftServer server, EntityPlayerMP entityPlayer) {
@@ -180,7 +157,7 @@ public class RerollHandler {
 
         if (Reroll.MODCOMPAT_ENDERSKILLS) {
             AdvancementCapability esadvancements = entityPlayer.getCapability(Capabilities.ADVANCEMENT, null);
-            esadvancements.consumeExperienceFromTotal(entityPlayer, Integer.MAX_VALUE);
+            Objects.requireNonNull(esadvancements).consumeExperienceFromTotal(entityPlayer, Integer.MAX_VALUE);
 
             server.getCommandManager().executeCommand(server, String.format("/es_advancement %s retries set 0", entityPlayer.getName()));
             server.getCommandManager().executeCommand(server, String.format("/es_advancement %s level set 1", entityPlayer.getName()));
@@ -191,19 +168,33 @@ public class RerollHandler {
     }
 
     public void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
+
+        WorldServer world;
+        BlockPos newPosition;
+
+        if (Config.useOverrideDim) {
+            world = DimensionManager.getWorld(Config.overrideDim);
+        } else if (Config.useCurrentDim) {
+            world = DimensionManager.getWorld(entityPlayer.dimension);
+        } else {
+            world = DimensionManager.getWorld(entityPlayer.getSpawnDimension());
+        }
+
+        newPosition = generateValidBlockPos(world, next);
+
         if (!Config.useCurrentDim) {
             CommandSetDimension setDimension = new CommandSetDimension();
             try {
                 if (entityPlayer.dimension != Config.overrideDim) {
                     setDimension.execute(server, entityPlayer, new String[] { entityPlayer.getName(), String.valueOf(Config.overrideDim), String.valueOf(0), String.valueOf(75), String.valueOf(0)});
                 }
-                executeTeleport(server, entityPlayer, generateValidBlockPos(entityPlayer, next));
+                executeTeleport(server, entityPlayer, newPosition);
                 entityPlayer.setSpawnDimension(Config.overrideDim);
             } catch (CommandException e) {
                 e.printStackTrace();
             }
         } else {
-            executeTeleport(server, entityPlayer, generateValidBlockPos(entityPlayer, next));
+            executeTeleport(server, entityPlayer, newPosition);
             entityPlayer.setSpawnDimension(entityPlayer.dimension);
         }
     }
@@ -213,26 +204,26 @@ public class RerollHandler {
         entityPlayer.setSpawnPoint(blockPos, true);
     }
 
-    public BlockPos generateValidBlockPos(EntityPlayerMP entityPlayer, boolean next) {
+    public BlockPos generateValidBlockPos(WorldServer world, boolean next) {
 
-        SPIRAL = CURRENT.getDimensionObjectByID(entityPlayer.dimension).getSpiral();
+        HOLDER.setSpiral(loadSpiral(world));
+        NBTTagCompound spiral = HOLDER.getSpiral();
 
-        if (next) SPIRAL.setSpiral(SPIRAL.next());
+        double posX = spiral.getInteger("posX") * Config.minDistance;
+        double posZ = spiral.getInteger("posZ") * Config.minDistance;
+        int worldHeight = world.getActualHeight();
+        int seaLevel = world.getSeaLevel();
 
-        double posX = SPIRAL.getPosX() * Config.minDistance;
-        double posZ = SPIRAL.getPosZ() * Config.minDistance;
-        World world = entityPlayer.getEntityWorld();
-        int height = world.getActualHeight();
-        BlockPos toReturn = new BlockPos(entityPlayer);
+        BlockPos toReturn = new BlockPos(0, 0, 0);
 
         boolean found = false;
 
-        for (int i = 2; i < height; i++) {
+        for (int i = seaLevel - 10; i < worldHeight; i++) {
             BlockPos topBlock = new BlockPos(posX, i, posZ);
             if (
                 (world.canBlockSeeSky(topBlock) && world.canBlockSeeSky(topBlock.down(1))) &&
                 (world.isAirBlock(topBlock) && world.isAirBlock(topBlock.down(1))) &&
-                !world.getBiome(topBlock).getRegistryName().getResourcePath().contains("ocean") &&
+                !Objects.requireNonNull(world.getBiome(topBlock).getRegistryName()).getResourcePath().contains("ocean") &&
                 world.getBlockState(topBlock.down(2)).getMaterial().isSolid() &&
                 world.getBlockState(topBlock.down(2)).isFullCube() &&
                 !world.getBlockState(topBlock.down(2)).getMaterial().isLiquid()
@@ -241,22 +232,39 @@ public class RerollHandler {
                 toReturn = new BlockPos(posX, i + 0.5f, posZ);
                 break;
             } else {
-                if (i == height) {
-                    SPIRAL.setSpiral(SPIRAL.next());
+                if (i == worldHeight - 1) {
+                    setNext(world);
                 }
             }
         }
-        Reroll.MAPPER.writeFile(CURRENT);
 
         if (found) {
+            if (next) HOLDER.setNext();
+            saveSpiral(world, HOLDER.getSpiral());
             return toReturn;
         } else {
-            return generateValidBlockPos(entityPlayer, next);
+            return generateValidBlockPos(world, next);
         }
     }
 
-    public void next() {
-        SPIRAL.setSpiral(SPIRAL.next());
-        Reroll.MAPPER.writeFile(CURRENT);
+    public NBTTagCompound loadSpiral(World world) {
+        WorldSavedData savedData = WorldSavedData.getDataForWorld(world, "spiral");
+        NBTTagCompound data = savedData.getDATA();
+
+        if (data.hasKey("posX") && data.hasKey("posZ") && data.hasKey("deltaX") &&data.hasKey("deltaZ")) {
+            return data;
+        }
+        return HOLDER.getSpiral();
+    }
+
+    public void saveSpiral(World world, NBTTagCompound spiral) {
+        WorldSavedData savedData = WorldSavedData.getDataForWorld(world, "spiral");
+        savedData.setDATA(spiral);
+        savedData.markDirty();
+    }
+
+    public void setNext(World world) {
+        HOLDER.setNext();
+        saveSpiral(world, HOLDER.getSpiral());
     }
 }

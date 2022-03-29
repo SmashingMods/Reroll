@@ -1,12 +1,12 @@
 package com.smashingmods.reroll;
 
+import com.smashingmods.reroll.capability.RerollCapability;
 import com.smashingmods.reroll.command.CommandReroll;
 import com.smashingmods.reroll.config.Config;
+import com.smashingmods.reroll.events.AttachModCapabilitiesEvent;
 import com.smashingmods.reroll.events.PlayerDeathEvent;
 import com.smashingmods.reroll.events.PlayerLoginEvent;
-import com.smashingmods.reroll.events.UseItemEvent;
 import com.smashingmods.reroll.item.DiceItem;
-import com.smashingmods.reroll.util.JsonMapper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -34,7 +34,6 @@ public class Reroll {
     public static final String MODID = "reroll";
     public static Configuration CONFIG;
     public static Logger LOGGER;
-    public static JsonMapper MAPPER = new JsonMapper();
 
     // Mod Compatibility
     public static boolean MODCOMPAT_TIMEISUP;
@@ -51,13 +50,14 @@ public class Reroll {
         LOGGER = event.getModLog();
         CONFIG = new Configuration(new File(path, "reroll.cfg"));
         Config.readConfig();
+        RerollCapability.register();
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new PlayerLoginEvent());
-        MinecraftForge.EVENT_BUS.register(new PlayerDeathEvent());
-        MinecraftForge.EVENT_BUS.register(new UseItemEvent());
+        MinecraftForge.EVENT_BUS.register(AttachModCapabilitiesEvent.class);
+        MinecraftForge.EVENT_BUS.register(PlayerLoginEvent.class);
+        MinecraftForge.EVENT_BUS.register(PlayerDeathEvent.class);
     }
 
     @EventHandler

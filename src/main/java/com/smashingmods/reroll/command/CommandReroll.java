@@ -1,9 +1,10 @@
 package com.smashingmods.reroll.command;
 
+import com.smashingmods.reroll.capability.RerollCapability;
+import com.smashingmods.reroll.capability.RerollCapabilityImplementation;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.handler.RerollHandler;
 import net.minecraft.command.*;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -16,16 +17,11 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.List;
 
-import static com.smashingmods.reroll.handler.LockHandler.*;
-import static com.smashingmods.reroll.util.TagUtil.getTag;
-
 public class CommandReroll extends CommandBase implements ICommand  {
 
-    private final RerollHandler handler;
+    private static final RerollHandler HANDLER = new RerollHandler();
 
-    public CommandReroll() {
-        this.handler = new RerollHandler();
-    }
+    public CommandReroll() {}
 
     @Override
     @Nonnull
@@ -53,51 +49,26 @@ public class CommandReroll extends CommandBase implements ICommand  {
                     if (!super.checkPermission(server, sender)) {
                         sender.sendMessage(new TextComponentTranslation("commands.reroll.permission").setStyle(new Style().setColor(TextFormatting.RED)));
                         break;
-                    }
-                }
-                if (sender instanceof EntityPlayer) {
-                    if (getTag(getCommandSenderAsPlayer(sender)).getBoolean(REROLL_LOCKED)) {
-                        sender.sendMessage(new TextComponentTranslation("commands.reroll.locked").setStyle(new Style().setColor(TextFormatting.RED)));
                     } else {
-                        handler.reroll(server, getCommandSenderAsPlayer(sender), true);
+                        sender.sendMessage(new TextComponentTranslation("commands.reroll.item_required"));
                     }
                 } else {
-                    sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
+                    rerollSelf(server, sender);
                 }
                 break;
             }
             case 1: {
                 switch (args[0]) {
                     case "lock": {
-                        if (sender instanceof EntityPlayer) {
-                            EntityPlayerMP entityplayer = getCommandSenderAsPlayer(sender);
-                            lockReroll(entityplayer);
-                            sender.sendMessage(new TextComponentTranslation("commands.lockreroll.successful", entityplayer.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                        } else {
-                            sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
-                        }
+                        lockSelf(sender);
                         break;
                     }
                     case "unlock": {
-                        if (sender instanceof EntityPlayer) {
-                            EntityPlayerMP entityplayer = getCommandSenderAsPlayer(sender);
-                            unlockReroll(entityplayer);
-                            sender.sendMessage(new TextComponentTranslation("commands.unlockreroll.successful", entityplayer.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                        } else {
-                            sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
-                        }
+                        unlockSelf(sender);
                         break;
                     }
                     case "all": {
-                        server.getPlayerList().getPlayers().forEach(player -> {
-                            if (getTag(player).getBoolean(REROLL_LOCKED)) {
-                                sender.sendMessage(new TextComponentTranslation("commands.reroll.server.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
-                            } else {
-                                handler.reroll(server, player, !Config.rerollAllTogether);
-                            }
-                        });
-                        if (Config.rerollAllTogether) handler.next();
-                        sender.sendMessage(new TextComponentTranslation("commands.rerollall.successful").setStyle(new Style().setColor(TextFormatting.AQUA)));
+                        rerollAll(server, sender);
                         break;
                     }
                     default: {
@@ -111,39 +82,15 @@ public class CommandReroll extends CommandBase implements ICommand  {
                 if (super.checkPermission(server, sender)) {
                     switch (args[0]) {
                         case "lock": {
-                            EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(args[1]);
-                            if (player != null) {
-                                lockReroll(player);
-                                sender.sendMessage(new TextComponentTranslation("commands.lockreroll.server.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                                player.sendMessage(new TextComponentTranslation("commands.lockreroll.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                            } else {
-                                sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", args[1]).setStyle(new Style().setColor(TextFormatting.RED)));
-                            }
+                            lockPlayer(server, sender, args[1]);
                             break;
                         }
                         case "unlock": {
-                            EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(args[1]);
-                            if (player != null) {
-                                unlockReroll(player);
-                                sender.sendMessage(new TextComponentTranslation("commands.unlockreroll.server.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                                player.sendMessage(new TextComponentTranslation("commands.unlockreroll.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                            } else {
-                                sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", args[1]).setStyle(new Style().setColor(TextFormatting.RED)));
-                            }
+                            unlockPlayer(server, sender, args[1]);
                             break;
                         }
                         case "player": {
-                            EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(args[1]);
-                            if (player != null) {
-                                if (getTag(player).getBoolean(REROLL_LOCKED)) {
-                                    sender.sendMessage(new TextComponentTranslation("commands.reroll.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
-                                } else {
-                                    handler.reroll(server, player, true);
-                                    sender.sendMessage(new TextComponentTranslation("commands.rerollplayer.successful", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
-                                }
-                            } else {
-                                sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", args[1]).setStyle(new Style().setColor(TextFormatting.RED)));
-                            }
+                            rerollPlayer(server, sender, args[1]);
                             break;
                         }
                         default: {
@@ -191,5 +138,105 @@ public class CommandReroll extends CommandBase implements ICommand  {
     @Override
     public int compareTo(@Nonnull ICommand o) {
         return 0;
+    }
+
+    private static void rerollSelf(MinecraftServer server, ICommandSender sender) {
+        if (sender instanceof EntityPlayerMP) {
+            RerollCapabilityImplementation rerollCapability = ((EntityPlayerMP) sender).getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            if (Objects.requireNonNull(rerollCapability).getLock()) {
+                sender.sendMessage(new TextComponentTranslation("commands.reroll.self.locked").setStyle(new Style().setColor(TextFormatting.RED)));
+            } else {
+                HANDLER.reroll(server, (EntityPlayerMP) sender, true);
+                sender.sendMessage(new TextComponentTranslation("commands.reroll.self"));
+            }
+        } else {
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
+        }
+    }
+
+    private static void lockSelf(ICommandSender sender) throws PlayerNotFoundException {
+        if (sender instanceof EntityPlayerMP) {
+            EntityPlayerMP entityplayer = getCommandSenderAsPlayer(sender);
+            RerollCapabilityImplementation rerollCapability = entityplayer.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            Objects.requireNonNull(rerollCapability).setLock(true);
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.self.lock", entityplayer.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+        } else {
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.self.lock"));
+        }
+    }
+
+    private static void unlockSelf(ICommandSender sender) throws PlayerNotFoundException {
+        if (sender instanceof EntityPlayerMP) {
+            EntityPlayerMP entityplayer = getCommandSenderAsPlayer(sender);
+            RerollCapabilityImplementation rerollCapability = entityplayer.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            Objects.requireNonNull(rerollCapability).setLock(false);
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.self.unlock", entityplayer.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+        } else {
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.server"));
+        }
+    }
+
+    private static void rerollPlayer(MinecraftServer server, ICommandSender sender, String playerName) {
+        EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(playerName);
+        if (player != null) {
+            RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            if (Objects.requireNonNull(rerollCapability).getLock()) {
+                sender.sendMessage(new TextComponentTranslation("commands.reroll.player.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
+            } else {
+                HANDLER.reroll(server, player, true);
+                if (player != sender) {
+                    player.sendMessage(new TextComponentTranslation("commands.reroll.player.rerolled"));
+                }
+                sender.sendMessage(new TextComponentTranslation("commands.reroll.player", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+            }
+        } else {
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", playerName).setStyle(new Style().setColor(TextFormatting.RED)));
+        }
+    }
+
+    private static void lockPlayer(MinecraftServer server, ICommandSender sender, String playerName) {
+        EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(playerName);
+        if (player != null) {
+            RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            Objects.requireNonNull(rerollCapability).setLock(true);
+            if (player != sender) {
+                player.sendMessage(new TextComponentTranslation("commands.reroll.self.lock", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+            }
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.player.lock", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+        } else {
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", playerName).setStyle(new Style().setColor(TextFormatting.RED)));
+        }
+    }
+
+    private static void unlockPlayer(MinecraftServer server, ICommandSender sender, String playerName) {
+        EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(playerName);
+        if (player != null) {
+            RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            Objects.requireNonNull(rerollCapability).setLock(false);
+            if (player != sender) {
+                player.sendMessage(new TextComponentTranslation("commands.reroll.self.unlock", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+            }
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.player.unlock", player.getName()).setStyle(new Style().setColor(TextFormatting.AQUA)));
+        } else {
+            sender.sendMessage(new TextComponentTranslation("commands.reroll.playernotfound", playerName).setStyle(new Style().setColor(TextFormatting.RED)));
+        }
+    }
+
+    private static void rerollAll(MinecraftServer server, ICommandSender sender) {
+        server.getPlayerList().getPlayers().forEach(player -> {
+            RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            if (Objects.requireNonNull(rerollCapability).getLock()) {
+                sender.sendMessage(new TextComponentTranslation("commands.reroll.player.locked", player.getName()).setStyle(new Style().setColor(TextFormatting.RED)));
+            } else {
+                HANDLER.reroll(server, player, !Config.rerollAllTogether);
+                if (player != sender) {
+                    player.sendMessage(new TextComponentTranslation("commands.reroll.player"));
+                } else {
+                    sender.sendMessage(new TextComponentTranslation("commands.reroll.player.rerolled"));
+                }
+            }
+        });
+        if (Config.rerollAllTogether) HANDLER.setNext(sender.getEntityWorld());
+        sender.sendMessage(new TextComponentTranslation("commands.reroll.all").setStyle(new Style().setColor(TextFormatting.AQUA)));
     }
 }

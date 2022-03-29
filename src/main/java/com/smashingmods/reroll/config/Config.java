@@ -12,6 +12,7 @@ public class Config {
     public static int minDistance;
     public static boolean rerollAllTogether;
     public static boolean useCurrentDim;
+    public static boolean useOverrideDim;
     public static int overrideDim;
     public static boolean initialInventory;
     public static boolean setNewInventory;
@@ -43,7 +44,8 @@ public class Config {
         rerollItems = config.getStringList("Reroll Inventory", CATEGORY_REROLL, new String[]{"reroll:dice;1"}, "A list of items that will be added to a player's inventory after using the reroll command.\nYou can add any existing item per line like this: \"minecraft:torch;16\".\nNote that you can only have as many items as there are inventory slots.");
         minDistance = config.getInt("Reroll Minimum Distance", CATEGORY_REROLL, 512, 256, 10240, "Determines the minimum distance to teleport when you reroll.");
         rerollAllTogether = config.getBoolean("Reroll All Together", CATEGORY_REROLL, false, "Should '/reroll all' send all players to the same location?");
-        useCurrentDim = config.getBoolean("Reroll Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set in the player's current dimension? If set to false, the override value will be used.");
+        useOverrideDim = config.getBoolean("Use Override Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set to the override dimension? If false, defaults to player spawn dimension.");
+        useCurrentDim = config.getBoolean("Use Current Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set in the player's current dimension? If false, defaults to player spawn dimension.");
         overrideDim = config.getInt("Override Dimension", CATEGORY_REROLL, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, "Override the dimension used for the reroll spawn location");
         initialInventory = config.getBoolean("Initial Inventory", CATEGORY_REROLL, true, "Should players get an initial inventory when they first join a world?");
         setNewInventory = config.getBoolean("Initial Inventory per Reroll", CATEGORY_REROLL, true, "Should players get an initial inventory every time they reroll?");

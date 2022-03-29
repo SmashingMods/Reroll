@@ -16,7 +16,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 apply plugin: 'java'
 
-version = '1.12.2-1.4.1'
+version = '1.12.2-1.5.0'
 group = 'com.smashingmods.reroll'
 archivesBaseName = 'reroll'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
@@ -46,7 +46,6 @@ dependencies {
     compile fg.deobf("curse.maven:timeisup-437596:3511732")
     compile fg.deobf("curse.maven:baubles-227083:2518667")
     compile fg.deobf("curse.maven:enderskills-391325:3523964")
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
 }
 
 jar {
@@ -61,19 +60,6 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-
-    dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.findAll {it.name.contains("jackson")}.collect { zipTree(it)}
-    }
-}
-
-task copyLibs(type: Copy) {
-    from configurations.compile
-    into 'libraries'
-    include "jackson-annotations-2.13.2.jar"
-    include "jackson-core-2.13.2.jar"
-    include "jackson-databind-2.13.2.jar"
 }
 
 jar.finalizedBy('reobfJar')

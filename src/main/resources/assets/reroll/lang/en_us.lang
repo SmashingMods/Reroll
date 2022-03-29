@@ -1,17 +1,25 @@
-commands.reroll.successful=Well, here we go again ... But hey, if you don't like it, you can always reroll!
 commands.reroll.usage=/reroll [lock|unlock|player|all] <playername>
 commands.reroll.permission=You do not have permission to use this command.
 commands.reroll.locked=Reroll locked! Use '/reroll unlock' to unlock yourself.
-commands.reroll.server.locked=Player %s has reroll locked.
 commands.reroll.server=The server can't be rerolled.
+commands.reroll.item_required=You need dice to reroll.
 commands.reroll.cooldown=You have to wait %d seconds to use reroll again.
-commands.rerollplayer.successful=Rerolling for player %s.
-commands.rerollplayer.usage=/reroll player <playername>
 commands.reroll.playernotfound=Player %s doesn't exist.
-commands.rerollall.successful=All online players have been rerolled.
-commands.rerollall.failure=Something went wrong, try again.
-commands.lockreroll.successful=Reroll locked.
-commands.unlockreroll.successful=Reroll unlocked.
-commands.lockreroll.server.successful=Locked reroll command for player %s.
-commands.unlockreroll.server.successful=Unlocked reroll command for player %s.
+commands.reroll.player=Rerolling for player %s
+commands.reroll.player.lock=Reroll locked for %s.
+commands.reroll.player.locked=%s has reroll locked. Use '/reroll unlock <player>' to unlock.
+commands.reroll.player.rerolled=You have been rerolled! Good luck.
+commands.reroll.player.unlock=Reroll unlocked for %s.
+commands.reroll.self=You rerolled yourself. Good luck!
+commands.reroll.self.lock=Reroll locked.
+commands.reroll.self.locked=Reroll locked. Use '/reroll unlock' to unlock yourself.
+commands.reroll.self.unlock=Reroll unlocked. Be careful!
+commands.reroll.all=All online players have been rerolled.
+
 item.reroll.dice.name=Reroll Dice
+reroll.dice.tooltip.description=Use this item to reroll.
+reroll.dice.tooltip.warning=This can't be undone!
+reroll.dice.cooldown=Dice are on cooldown.
+
+reroll.death_event.player=Oh no, you died! You were rerolled on death. Good luck!
+reroll.death_event.broadcast=Oh no, %s died! Wish them luck on their new reroll.
