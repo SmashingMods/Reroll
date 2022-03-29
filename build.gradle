@@ -108,8 +108,22 @@ publishing {
     }
 }
 
+def secrets = new Properties()
+file('secrets.properties').withInputStream {
+    stream -> secrets.load(stream)
+}
+
+fileTree("secrets").matching {
+    include "**/*.properties"
+}.each {
+    File file ->
+        file.withInputStream {
+            stream -> secrets.load(stream)
+        }
+}
+
 curseforge {
-    apiKey = '0bf5fb4f-44a2-451e-aac4-97e39b16fcad'
+    apiKey = secrets.getProperty("apiKey")
     project {
         id = '592315'
         releaseType = 'release'
