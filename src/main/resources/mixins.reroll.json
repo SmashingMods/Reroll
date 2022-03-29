@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "package": "com.smashingmods.reroll.mixin",
+  "refmap": "refmap.reroll.json",
+  "mixins": [
+    "WorldMixin"
+  ],
+  "client": [],
+  "server": [],
+  "minVersion": "0.8"
+}

@@ -9,6 +9,7 @@ import com.smashingmods.reroll.capability.WorldSavedData;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.item.DiceItem;
 import com.smashingmods.reroll.model.Spiral;
+import com.smashingmods.reroll.util.PositionUtil;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -20,7 +21,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.server.command.CommandSetDimension;
@@ -32,6 +32,8 @@ import timeisup.network.TimerPacket;
 
 import javax.annotation.Nullable;
 import java.util.*;
+
+import static com.smashingmods.reroll.util.PositionUtil.blockStatePredicate;
 
 public class RerollHandler {
 
@@ -173,11 +175,11 @@ public class RerollHandler {
         BlockPos newPosition;
 
         if (Config.useOverrideDim) {
-            world = DimensionManager.getWorld(Config.overrideDim);
+            world = server.getWorld(Config.overrideDim);
         } else if (Config.useCurrentDim) {
-            world = DimensionManager.getWorld(entityPlayer.dimension);
+            world = server.getWorld(entityPlayer.dimension);
         } else {
-            world = DimensionManager.getWorld(entityPlayer.getSpawnDimension());
+            world = server.getWorld(entityPlayer.getSpawnDimension());
         }
 
         newPosition = generateValidBlockPos(world, next);
@@ -188,20 +190,14 @@ public class RerollHandler {
                 if (entityPlayer.dimension != Config.overrideDim) {
                     setDimension.execute(server, entityPlayer, new String[] { entityPlayer.getName(), String.valueOf(Config.overrideDim), String.valueOf(0), String.valueOf(75), String.valueOf(0)});
                 }
-                executeTeleport(server, entityPlayer, newPosition);
                 entityPlayer.setSpawnDimension(Config.overrideDim);
             } catch (CommandException e) {
                 e.printStackTrace();
             }
         } else {
-            executeTeleport(server, entityPlayer, newPosition);
             entityPlayer.setSpawnDimension(entityPlayer.dimension);
         }
-    }
-
-    public void executeTeleport(MinecraftServer server, EntityPlayerMP entityPlayer, BlockPos blockPos) {
-        server.getCommandManager().executeCommand(server, String.format("/tp %s %d %d %d", entityPlayer.getName(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-        entityPlayer.setSpawnPoint(blockPos, true);
+        entityPlayer.setPositionAndUpdate(newPosition.getX(), newPosition.getY() + 2.5f, newPosition.getZ());
     }
 
     public BlockPos generateValidBlockPos(WorldServer world, boolean next) {
@@ -214,37 +210,11 @@ public class RerollHandler {
         int worldHeight = world.getActualHeight();
         int seaLevel = world.getSeaLevel();
 
-        BlockPos toReturn = new BlockPos(0, 0, 0);
+        Optional<BlockPos> toReturn = PositionUtil.findClosest(new BlockPos(posX, seaLevel, posZ), 64, worldHeight / 4, blockStatePredicate(world));
 
-        boolean found = false;
-
-        for (int i = seaLevel - 10; i < worldHeight; i++) {
-            BlockPos topBlock = new BlockPos(posX, i, posZ);
-            if (
-                (world.canBlockSeeSky(topBlock) && world.canBlockSeeSky(topBlock.down(1))) &&
-                (world.isAirBlock(topBlock) && world.isAirBlock(topBlock.down(1))) &&
-                !Objects.requireNonNull(world.getBiome(topBlock).getRegistryName()).getResourcePath().contains("ocean") &&
-                world.getBlockState(topBlock.down(2)).getMaterial().isSolid() &&
-                world.getBlockState(topBlock.down(2)).isFullCube() &&
-                !world.getBlockState(topBlock.down(2)).getMaterial().isLiquid()
-            ) {
-                found = true;
-                toReturn = new BlockPos(posX, i + 0.5f, posZ);
-                break;
-            } else {
-                if (i == worldHeight - 1) {
-                    setNext(world);
-                }
-            }
-        }
-
-        if (found) {
-            if (next) HOLDER.setNext();
-            saveSpiral(world, HOLDER.getSpiral());
-            return toReturn;
-        } else {
-            return generateValidBlockPos(world, next);
-        }
+        if (next) HOLDER.setNext();
+        saveSpiral(world, HOLDER.getSpiral());
+        return toReturn.orElseGet(() -> generateValidBlockPos(world, true));
     }
 
     public NBTTagCompound loadSpiral(World world) {
