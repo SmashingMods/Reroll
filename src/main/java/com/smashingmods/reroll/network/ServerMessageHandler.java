@@ -1,5 +1,6 @@
 package com.smashingmods.reroll.network;
 
+import com.smashingmods.reroll.config.ConfigHandler;
 import com.smashingmods.reroll.handler.RerollHandler;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
@@ -23,7 +24,7 @@ public class ServerMessageHandler {
                 Objects.requireNonNull(sender.getServer()).sendMessage(new TranslationTextComponent("reroll.dice.cooldown"), sender.getUUID());
             } else {
                 handler.reroll(sender, true);
-                tracker.addCooldown(item, 10 * 20);
+                tracker.addCooldown(item, ConfigHandler.Common.cooldown.get() * 20);
             }
         });
         context.get().setPacketHandled(true);

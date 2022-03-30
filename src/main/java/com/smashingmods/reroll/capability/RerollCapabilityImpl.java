@@ -4,7 +4,7 @@ import net.minecraft.nbt.CompoundNBT;
 
 import javax.annotation.Nonnull;
 
-public class RerollCapabilityImplementation implements RerollCapabilityInterface {
+public class RerollCapabilityImpl implements IRerollCapability {
 
     private static boolean ITEMS_RECEIVED = false;
     private static boolean LOCK = false;

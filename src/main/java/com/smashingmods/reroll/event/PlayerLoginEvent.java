@@ -1,10 +1,11 @@
 package com.smashingmods.reroll.event;
 
 import com.smashingmods.reroll.capability.RerollCapability;
-import com.smashingmods.reroll.capability.RerollCapabilityImplementation;
+import com.smashingmods.reroll.capability.IRerollCapability;
 import com.smashingmods.reroll.config.ConfigHandler;
 import com.smashingmods.reroll.util.RerollUtilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -18,16 +19,14 @@ public class PlayerLoginEvent {
     public static void onPlayerLoggedInEvent(@Nonnull PlayerEvent.PlayerLoggedInEvent event) {
         if (ConfigHandler.Common.initialInventory.get()) {
             PlayerEntity player = event.getPlayer();
-            try {
-                RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
+            LazyOptional<IRerollCapability> rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
 
-                if (!rerollCapability.getItemsReceived()) {
+            rerollCapability.ifPresent(cap -> {
+                if (!cap.getItemsReceived()) {
                     RerollUtilities.setInventory(player);
-                    rerollCapability.setItemsReceived(true);
+                    cap.setItemsReceived(true);
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            });
         }
     }
 }

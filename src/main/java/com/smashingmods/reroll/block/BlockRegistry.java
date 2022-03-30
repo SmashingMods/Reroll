@@ -15,7 +15,7 @@ public class BlockRegistry {
 
     public static final RegistryObject<Block> GRAVE_NORMAL = BLOCKS.register("grave_normal", () -> new GraveBlock(GraveModel.GRAVE_NORMAL));
     @SuppressWarnings("all")
-    public static final RegistryObject<TileEntityType<?>> GRAVE_TILE = TILE_ENTITIES.register("grave_tile", () -> TileEntityType.Builder.of(GraveBlockTileEntity::new, new GraveBlock[] { (GraveBlock) GRAVE_NORMAL.get() }).build(null));
+    public static final RegistryObject<TileEntityType<?>> GRAVE_TILE = TILE_ENTITIES.register("grave_tile", () -> TileEntityType.Builder.of(GraveTileEntity::new, new GraveBlock[] { (GraveBlock) GRAVE_NORMAL.get() }).build(null));
 
     public static void register() {
         BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());

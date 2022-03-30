@@ -11,8 +11,9 @@ public class RerollUtilities {
 
     public static void setInventory(PlayerEntity pPlayer) {
         for (String configString : ConfigHandler.Common.rerollItems.get()) {
-            String itemName = configString.split(";")[0];
-            int count = Integer.parseInt(configString.split(";")[1]);
+            String[] split = configString.split(";");
+            String itemName = split[0];
+            int count = Integer.parseInt(split[1]);
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName));
             ItemStack itemStack = new ItemStack(item, count);
             pPlayer.inventory.add(itemStack);

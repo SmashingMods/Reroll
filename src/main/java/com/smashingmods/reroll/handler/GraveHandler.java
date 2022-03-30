@@ -1,7 +1,7 @@
 package com.smashingmods.reroll.handler;
 
 import com.smashingmods.reroll.block.BlockRegistry;
-import com.smashingmods.reroll.block.GraveBlockTileEntity;
+import com.smashingmods.reroll.block.GraveTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFaceBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,13 +12,21 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.util.ICuriosHelper;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+
+import static com.smashingmods.reroll.handler.ModCompatibilityHandler.CURIOS_LOADED;
 
 public class GraveHandler {
 
@@ -27,12 +35,14 @@ public class GraveHandler {
         BlockPos pos = pPlayer.blockPosition();
         BlockState state = BlockRegistry.GRAVE_NORMAL.get().defaultBlockState();
         world.setBlock(pos, getFacingState(state, pPlayer.getViewYRot(0.0F)), 2);
-        GraveBlockTileEntity graveBlockTileEntity = (GraveBlockTileEntity) world.getBlockEntity(pos);
+        GraveTileEntity graveBlockTileEntity = (GraveTileEntity) world.getBlockEntity(pos);
 
-        IItemHandler itemHandler = Objects.requireNonNull(graveBlockTileEntity).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElseThrow(() -> new IllegalStateException("Reroll grave inventory handler not present."));
-        for (ItemStack itemStack : getItemList(pPlayer)) {
-            ItemHandlerHelper.insertItemStacked(itemHandler, itemStack, false);
-        }
+        LazyOptional<IItemHandler> itemHandler = Objects.requireNonNull(graveBlockTileEntity).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        itemHandler.ifPresent(handler -> {
+            for (ItemStack itemStack : getItemList(pPlayer)) {
+                ItemHandlerHelper.insertItemStacked(handler, itemStack, false);
+            }
+        });
         pPlayer.inventory.clearContent();
     }
 
@@ -76,7 +86,26 @@ public class GraveHandler {
                 toReturn.add(itemStack);
             }
         }
-
+        if (CURIOS_LOADED) {
+            for (ItemStack itemStack : getCuriosIfPresent(pPlayer)) {
+                //noinspection UseBulkOperation
+                toReturn.add(itemStack);
+            }
+        }
         return toReturn;
+    }
+
+    public static List<ItemStack> getCuriosIfPresent(PlayerEntity pPlayer) {
+        List<ItemStack> curios = new ArrayList<>();
+        ICuriosHelper helper = CuriosApi.getCuriosHelper();
+        LazyOptional<IItemHandlerModifiable> equipped = helper.getEquippedCurios(pPlayer);
+
+        equipped.ifPresent(handler -> {
+            for (int i = 0; i < handler.getSlots(); i++) {
+                curios.add(handler.getStackInSlot(i));
+                handler.setStackInSlot(i, ItemStack.EMPTY);
+            }
+        });
+        return curios;
     }
 }

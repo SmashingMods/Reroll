@@ -84,7 +84,7 @@ public class GraveBlock extends Block implements IWaterLoggable {
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new GraveBlockTileEntity();
+        return new GraveTileEntity();
     }
 
     @Override
@@ -107,7 +107,7 @@ public class GraveBlock extends Block implements IWaterLoggable {
     public void onRemove(@Nonnull BlockState pState, @Nonnull World pLevel, @Nonnull BlockPos pPos, @Nonnull BlockState pNewState, boolean pIsMoving) {
         if (!pState.is(pNewState.getBlock())) {
             TileEntity tileEntity = pLevel.getBlockEntity(pPos);
-            if (tileEntity instanceof GraveBlockTileEntity) {
+            if (tileEntity instanceof GraveTileEntity) {
                 IItemHandler itemHandler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElseThrow(() -> new IllegalStateException("Reroll grave inventory handler not present."));
                 for (int i = 0; i < itemHandler.getSlots(); i++) {
                     ItemStack itemStack = itemHandler.getStackInSlot(i);

@@ -20,11 +20,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class GraveBlockTileEntity extends TileEntity  {
+public class GraveTileEntity extends TileEntity  {
 
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(this::createHandler);
 
-    public GraveBlockTileEntity() {
+    public GraveTileEntity() {
         super(BlockRegistry.GRAVE_TILE.get());
     }
 

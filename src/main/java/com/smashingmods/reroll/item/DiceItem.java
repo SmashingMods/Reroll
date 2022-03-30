@@ -1,7 +1,7 @@
 package com.smashingmods.reroll.item;
 
 import com.smashingmods.reroll.capability.RerollCapability;
-import com.smashingmods.reroll.capability.RerollCapabilityImplementation;
+import com.smashingmods.reroll.capability.IRerollCapability;
 import com.smashingmods.reroll.network.RerollPacket;
 import com.smashingmods.reroll.network.RerollPacketHandler;
 import net.minecraft.client.util.ITooltipFlag;
@@ -13,6 +13,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,17 +40,15 @@ public class DiceItem extends Item {
                 PlayerEntity player = (PlayerEntity) pEntityLiving;
                 player.stopUsingItem();
                 if (pLevel.isClientSide) {
-                    try {
-                        RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
-                        if (!rerollCapability.getLock()) {
+                    LazyOptional<IRerollCapability> rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+                    rerollCapability.ifPresent(cap -> {
+                        if (!cap.getLock()) {
                             RerollPacketHandler.INSTANCE.sendToServer(new RerollPacket(getItemStack()));
                             player.sendMessage(new TranslationTextComponent("commands.reroll.self").withStyle(TextFormatting.AQUA), player.getUUID());
                         } else {
                             player.sendMessage(new TranslationTextComponent("commands.reroll.self.locked").withStyle(TextFormatting.RED), player.getUUID());
                         }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
+                    });
                 }
             }
         }

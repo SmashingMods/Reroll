@@ -1,8 +1,9 @@
-# Initial 1.16.5 Release
-Note that there might be some bugs or issues that need to be ironed out. There currently no built in mod support. I will be adding support for some must have mods like Curios soon.
-
 # Changes
-- New Dice model.
-- New config options.
-- New grave block.
-- Massively improved codebase. 1.12.2 is a mess.
+- Add Curios support.
+- Refactor capabilities to LazyOptional wherever they are required.
+
+# Fixes
+- Fix capabilities so that the reroll capability is only returned when it should be and not on every get capability call.
+- When a player dies, persist their capabilities during clone event.
+- Remove testing code in ServerMessageHandler and properly set cooldown.
+- Improved ConfigHandler rerollItems array to check the array size of the split string.

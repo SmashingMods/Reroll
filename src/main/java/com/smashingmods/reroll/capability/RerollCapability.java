@@ -6,14 +6,14 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 
 public class RerollCapability {
 
-    @CapabilityInject(RerollCapabilityInterface.class)
-    public static Capability<RerollCapabilityImplementation> REROLL_CAPABILITY = null;
+    @CapabilityInject(IRerollCapability.class)
+    public static Capability<IRerollCapability> REROLL_CAPABILITY = null;
 
     public static void register() {
         CapabilityManager.INSTANCE.register(
-                RerollCapabilityInterface.class,
+                IRerollCapability.class,
                 new RerollCapabilityStorage(),
-                RerollCapabilityImplementation::new
+                RerollCapabilityImpl::new
         );
     }
 }

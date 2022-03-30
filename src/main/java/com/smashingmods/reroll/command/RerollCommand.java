@@ -3,7 +3,7 @@ package com.smashingmods.reroll.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.smashingmods.reroll.capability.RerollCapability;
-import com.smashingmods.reroll.capability.RerollCapabilityImplementation;
+import com.smashingmods.reroll.capability.IRerollCapability;
 import com.smashingmods.reroll.config.ConfigHandler;
 import com.smashingmods.reroll.handler.RerollHandler;
 import net.minecraft.command.CommandSource;
@@ -12,14 +12,15 @@ import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Objects;
 
 public class RerollCommand {
 
     private static final RerollHandler HANDLER = new RerollHandler();
+    private static LazyOptional<IRerollCapability> REROLL_CAPABILITY;
 
     public static void register(@Nonnull CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("reroll")
@@ -60,60 +61,47 @@ public class RerollCommand {
     }
 
     private static int self(@Nonnull CommandSource pSource) throws CommandSyntaxException {
-        try {
-            ServerPlayerEntity player = pSource.getPlayerOrException();
-            RerollCapabilityImplementation lockCapability = Objects.requireNonNull(pSource.getEntity()).getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
-
+        ServerPlayerEntity player = pSource.getPlayerOrException();
+        REROLL_CAPABILITY = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+        REROLL_CAPABILITY.ifPresent(cap -> {
             if (ConfigHandler.Common.requireItem.get()) {
                 player.sendMessage(new TranslationTextComponent("commands.reroll.item_required").withStyle(TextFormatting.RED), player.getUUID());
-                return 1;
-            } else if (!lockCapability.getLock()) {
+            } else if (!cap.getLock()) {
                 HANDLER.reroll(player, true);
                 player.sendMessage(new TranslationTextComponent("commands.reroll.self").withStyle(TextFormatting.AQUA), player.getUUID());
             } else {
                 player.sendMessage(new TranslationTextComponent("commands.reroll.self.locked").withStyle(TextFormatting.RED), player.getUUID());
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return 0;
-        }
+        });
         return 1;
     }
 
-    private static int lockSelf(@Nonnull CommandSource pSource)  {
-        try {
-            ServerPlayerEntity player = pSource.getPlayerOrException();
-            RerollCapabilityImplementation lockCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access capability on player."));
-            lockCapability.setLock(true);
+    private static int lockSelf(@Nonnull CommandSource pSource) throws CommandSyntaxException {
+        ServerPlayerEntity player = pSource.getPlayerOrException();
 
-            player.sendMessage(new TranslationTextComponent("commands.reroll.self.lock").withStyle(TextFormatting.YELLOW), player.getUUID());
-        } catch (IllegalAccessException | CommandSyntaxException e) {
-            e.printStackTrace();
-            return 0;
-        }
+        REROLL_CAPABILITY = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+        REROLL_CAPABILITY.ifPresent(cap -> cap.setLock(true));
+
+        player.sendMessage(new TranslationTextComponent("commands.reroll.self.lock").withStyle(TextFormatting.YELLOW), player.getUUID());
         return 1;
     }
 
-    private static int unlockSelf(@Nonnull CommandSource pSource) {
-        try {
-            ServerPlayerEntity player = pSource.getPlayerOrException();
-            RerollCapabilityImplementation lockCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
-            lockCapability.setLock(false);
+    private static int unlockSelf(@Nonnull CommandSource pSource) throws CommandSyntaxException {
+        ServerPlayerEntity player = pSource.getPlayerOrException();
 
-            player.sendMessage(new TranslationTextComponent("commands.reroll.self.unlock").withStyle(TextFormatting.YELLOW), player.getUUID());
-        } catch (IllegalAccessException | CommandSyntaxException e) {
-            e.printStackTrace();
-            return 0;
-        }
+        REROLL_CAPABILITY = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+        REROLL_CAPABILITY.ifPresent(cap -> cap.setLock(false));
+
+        player.sendMessage(new TranslationTextComponent("commands.reroll.self.unlock").withStyle(TextFormatting.YELLOW), player.getUUID());
         return 1;
     }
 
-    private static int player(@Nonnull CommandSource pSource, @Nonnull ServerPlayerEntity pPlayer) {
-        try {
-            ServerPlayerEntity sender = pSource.getPlayerOrException();
-            RerollCapabilityImplementation lockCapability = pPlayer.getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
+    private static int player(@Nonnull CommandSource pSource, @Nonnull ServerPlayerEntity pPlayer) throws CommandSyntaxException {
+        ServerPlayerEntity sender = pSource.getPlayerOrException();
 
-            if (!lockCapability.getLock()) {
+        REROLL_CAPABILITY = pPlayer.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+        REROLL_CAPABILITY.ifPresent(cap -> {
+            if (!cap.getLock()) {
                 HANDLER.reroll(pPlayer, true);
 
                 if (sender.getUUID() != pPlayer.getUUID()) {
@@ -123,62 +111,51 @@ public class RerollCommand {
             } else {
                 sender.sendMessage(new TranslationTextComponent("commands.reroll.player.locked").withStyle(TextFormatting.RED), sender.getUUID());
             }
-        } catch (IllegalAccessException | CommandSyntaxException e) {
-            e.printStackTrace();
-            return 0;
+        });
+        return 1;
+    }
+
+    private static int lockPlayer(CommandSource pSource, ServerPlayerEntity pPlayer) throws CommandSyntaxException {
+        ServerPlayerEntity sender = pSource.getPlayerOrException();
+
+        REROLL_CAPABILITY = pPlayer.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+        REROLL_CAPABILITY.ifPresent(cap -> cap.setLock(true));
+
+        pPlayer.sendMessage(new TranslationTextComponent("commands.reroll.self.lock").withStyle(TextFormatting.YELLOW), pPlayer.getUUID());
+        if (sender.getUUID() != pPlayer.getUUID()) {
+            sender.sendMessage(new TranslationTextComponent("commands.reroll.player.lock", pPlayer.getName()).withStyle(TextFormatting.YELLOW), sender.getUUID());
         }
         return 1;
     }
 
-    private static int lockPlayer(CommandSource pSource, ServerPlayerEntity pPlayer) {
-        try {
-            ServerPlayerEntity sender = pSource.getPlayerOrException();
-            RerollCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
-            lockCapability.setLock(true);
+    private static int unlockPlayer(CommandSource pSource, ServerPlayerEntity pPlayer) throws CommandSyntaxException {
+        ServerPlayerEntity sender = pSource.getPlayerOrException();
 
-            pPlayer.sendMessage(new TranslationTextComponent("commands.reroll.self.lock").withStyle(TextFormatting.YELLOW), pPlayer.getUUID());
+        REROLL_CAPABILITY = pPlayer.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+        REROLL_CAPABILITY.ifPresent(cap -> cap.setLock(false));
 
-            if (sender.getUUID() != pPlayer.getUUID()) {
-                sender.sendMessage(new TranslationTextComponent("commands.reroll.player.lock", pPlayer.getName()).withStyle(TextFormatting.YELLOW), sender.getUUID());
-            }
-        } catch (IllegalAccessException | CommandSyntaxException e) {
-            e.printStackTrace();
-            return 0;
+        pPlayer.sendMessage(new TranslationTextComponent("commands.reroll.self.unlock").withStyle(TextFormatting.YELLOW), pPlayer.getUUID());
+        if (sender.getUUID() != pPlayer.getUUID()) {
+            sender.sendMessage(new TranslationTextComponent("commands.reroll.player.unlock", pPlayer.getName()).withStyle(TextFormatting.YELLOW), sender.getUUID());
         }
         return 1;
     }
 
-    private static int unlockPlayer(CommandSource pSource, ServerPlayerEntity pPlayer) {
-        try {
-            ServerPlayerEntity sender = pSource.getPlayerOrException();
-            RerollCapabilityImplementation lockCapability = pPlayer.getEntity().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
-            lockCapability.setLock(false);
+    private static int all(CommandSource pSource) throws CommandSyntaxException {
+        ServerPlayerEntity sender = pSource.getPlayerOrException();
+        List<ServerPlayerEntity> playerList = pSource.getServer().getPlayerList().getPlayers();
 
-            pPlayer.sendMessage(new TranslationTextComponent("commands.reroll.self.unlock").withStyle(TextFormatting.YELLOW), pPlayer.getUUID());
-            if (sender.getUUID() != pPlayer.getUUID()) {
-                sender.sendMessage(new TranslationTextComponent("commands.reroll.player.unlock", pPlayer.getName()).withStyle(TextFormatting.YELLOW), sender.getUUID());
-            }
-        } catch (IllegalAccessException | CommandSyntaxException e) {
-            e.printStackTrace();
-            return 0;
-        }
-        return 1;
-    }
+        for (ServerPlayerEntity player : playerList) {
 
-    private static int all(CommandSource pSource) {
-        try {
-            ServerPlayerEntity sender = pSource.getPlayerOrException();
-            List<ServerPlayerEntity> playerList = pSource.getServer().getPlayerList().getPlayers();
-            for (ServerPlayerEntity player : playerList) {
-                RerollCapabilityImplementation lockCapability = player.getEntity().getCapability(RerollCapability.REROLL_CAPABILITY, null).orElseThrow(() -> new IllegalAccessException("Reroll attempted to access lock capability on player."));
-                if (!lockCapability.getLock()) {
+            REROLL_CAPABILITY = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            REROLL_CAPABILITY.ifPresent(cap -> {
 
+                if (!cap.getLock()) {
                     if (ConfigHandler.Common.rerollAllTogether.get()) {
                         HANDLER.reroll(player, false);
                     } else {
                         HANDLER.reroll(sender, player, true);
                     }
-
                     if (sender.getUUID() != player.getUUID()) {
                         sender.sendMessage(new TranslationTextComponent("commands.reroll.player", player.getName()).withStyle(TextFormatting.YELLOW), sender.getUUID());
                     }
@@ -186,13 +163,13 @@ public class RerollCommand {
                 } else {
                     sender.sendMessage(new TranslationTextComponent("commands.reroll.player.locked").withStyle(TextFormatting.RED), sender.getUUID());
                 }
-            }
-            if (ConfigHandler.Common.rerollAllTogether.get()) {
-                HANDLER.setNext(sender.getLevel());
-            }
-        } catch (IllegalAccessException | CommandSyntaxException e) {
-            e.printStackTrace();
+            });
         }
+
+        if (ConfigHandler.Common.rerollAllTogether.get()) {
+            HANDLER.setNext(sender.getLevel());
+        }
+
         return 1;
     }
 }

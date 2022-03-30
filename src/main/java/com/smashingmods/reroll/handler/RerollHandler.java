@@ -47,6 +47,7 @@ public class RerollHandler {
     }
 
     public void resetInventory(ServerPlayerEntity pPlayer) {
+
         if (!ConfigHandler.Common.createGraveOnReroll.get()) {
             if (ConfigHandler.Common.wipeCurrentInventory.get()) {
                 pPlayer.inventory.clearContent();
@@ -55,8 +56,7 @@ public class RerollHandler {
                 RerollUtilities.setInventory(pPlayer);
             }
         }  else {
-            // If reroll on death was set, the player death event would have already placed a grave.
-            if (!ConfigHandler.Common.rerollOnDeath.get()) GraveHandler.handleGrave(pPlayer);
+            GraveHandler.handleGrave(pPlayer);
         }
 
         if (ConfigHandler.Common.resetEnderChest.get()) {
@@ -147,9 +147,7 @@ public class RerollHandler {
         int seaLevel = pWorld.getSeaLevel();
         boolean ceiling = pWorld.dimensionType().hasCeiling();
 
-        pWorld.getProfiler().push("Block Position Validator");
         Optional<BlockPos> toReturn = BlockPos.findClosestMatch(new BlockPos(posX, ceiling ? (double) worldHeight / 2 : seaLevel, posZ), ceiling ? 8 : 16, ceiling ? worldHeight / 4 : 32, blockStatePredicate(pWorld));
-        pWorld.getProfiler().pop();
 
         if (pNext) HOLDER.setNext();
         saveSpiral(pWorld, HOLDER.getSpiral());

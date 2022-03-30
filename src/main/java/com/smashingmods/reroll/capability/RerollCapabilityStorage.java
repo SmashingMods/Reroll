@@ -8,14 +8,14 @@ import net.minecraftforge.common.capabilities.Capability;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RerollCapabilityStorage implements Capability.IStorage<RerollCapabilityInterface> {
+public class RerollCapabilityStorage implements Capability.IStorage<IRerollCapability> {
 
     private final String received = "recieved";
     private final String locked = "locked";
 
     @Nullable
     @Override
-    public INBT writeNBT(Capability<RerollCapabilityInterface> capability, @Nonnull RerollCapabilityInterface instance, Direction side) {
+    public INBT writeNBT(Capability<IRerollCapability> capability, @Nonnull IRerollCapability instance, Direction side) {
         CompoundNBT tag = new CompoundNBT();
         tag.putBoolean(received, instance.getItemsReceived());
         tag.putBoolean(locked, instance.getLock());
@@ -23,7 +23,7 @@ public class RerollCapabilityStorage implements Capability.IStorage<RerollCapabi
     }
 
     @Override
-    public void readNBT(Capability<RerollCapabilityInterface> capability, RerollCapabilityInterface instance, Direction side, @Nonnull INBT nbt) {
+    public void readNBT(Capability<IRerollCapability> capability, IRerollCapability instance, Direction side, @Nonnull INBT nbt) {
 
         boolean itemsReceived = false;
         boolean lock = false;

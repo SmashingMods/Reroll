@@ -12,13 +12,16 @@ import javax.annotation.Nullable;
 
 public class RerollCapabilityProvider implements ICapabilitySerializable<INBT> {
 
-    private final RerollCapabilityImplementation rerollCapability = new RerollCapabilityImplementation();
+    private final RerollCapabilityImpl rerollCapability = new RerollCapabilityImpl();
 
     @Nonnull
     @Override
-    @SuppressWarnings("unchecked")
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        return (LazyOptional<T>) LazyOptional.of(() -> rerollCapability);
+        if (cap == RerollCapability.REROLL_CAPABILITY) {
+            return LazyOptional.of(() -> rerollCapability).cast();
+        } else {
+            return LazyOptional.empty();
+        }
     }
 
     @Override

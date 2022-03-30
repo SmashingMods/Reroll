@@ -1,5 +1,6 @@
 package com.smashingmods.reroll.config;
 
+import com.smashingmods.reroll.Reroll;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
@@ -147,9 +148,15 @@ public class ConfigHandler {
                             seperator)
                     .defineList("rerollItems", itemsVector, configItem -> {
                         if (configItem instanceof String) {
-                            String name = ((String) configItem).split(";")[0];
-                            int count = Integer.parseInt(((String) configItem).split(";")[1]);
-                            return ResourceLocation.tryParse(name) != null && count > 0 && count <= 64;
+                            String[] split = ((String) configItem).split(";");
+
+                            if (split.length == 2) {
+                                String name = split[0];
+                                int count = Integer.parseInt(split[1]);
+                                return ResourceLocation.tryParse(name) != null && count > 0 && count <= 64;
+                            } else {
+                                Reroll.LOGGER.warn(String.format("%s isn't a valid item entry. Check the Reroll config.", configItem));
+                            }
                         }
                         return false;
                     });

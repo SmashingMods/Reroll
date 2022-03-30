@@ -3,6 +3,7 @@ package com.smashingmods.reroll;
 import com.smashingmods.reroll.block.BlockRegistry;
 import com.smashingmods.reroll.capability.RerollCapability;
 import com.smashingmods.reroll.config.ConfigHandler;
+import com.smashingmods.reroll.handler.ModCompatibilityHandler;
 import com.smashingmods.reroll.item.ItemRegistry;
 import com.smashingmods.reroll.network.RerollPacketHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -32,5 +33,6 @@ public class Reroll {
     public void commonSetup(final FMLCommonSetupEvent event) {
         RerollCapability.register();
         RerollPacketHandler.register();
+        ModCompatibilityHandler.register();
     }
 }
