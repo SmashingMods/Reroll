@@ -34,7 +34,7 @@ public class RerollHandler {
         reroll(null, pPlayer, pNext);
     }
 
-    public void reroll(@Nullable ServerPlayerEntity pSender, ServerPlayerEntity pPlayer, boolean pNext) {
+    public void reroll(@Nullable ServerPlayerEntity pSender, @Nonnull ServerPlayerEntity pPlayer, boolean pNext) {
 
         resetInventory(pPlayer);
         if (pSender != null) {
@@ -56,7 +56,9 @@ public class RerollHandler {
                 RerollUtilities.setInventory(pPlayer);
             }
         }  else {
-            GraveHandler.handleGrave(pPlayer);
+            if (!pPlayer.inventory.isEmpty()) {
+                GraveHandler.handleGrave(pPlayer);
+            }
         }
 
         if (ConfigHandler.Common.resetEnderChest.get()) {
