@@ -13,6 +13,7 @@ public class RerollDataGenerator {
         DataGenerator generator = event.getGenerator();
         if (event.includeClient()) {
             generator.addProvider(new LocalizationDataGenerator(generator, "en_us"));
+            generator.addProvider(new ItemModelGenerator(generator, event.getExistingFileHelper()));
             generator.addProvider(new BlockStateGenerator(generator, event.getExistingFileHelper()));
         }
     }

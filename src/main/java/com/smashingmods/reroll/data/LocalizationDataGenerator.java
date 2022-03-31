@@ -13,6 +13,7 @@ public class LocalizationDataGenerator extends LanguageProvider {
     @Override
     protected void addTranslations() {
         add("item.reroll.dice", "Reroll Dice");
+        add("block.reroll.grave.grave_normal", "Grave");
         add("reroll.dice.tooltip.description", "Use this item to reroll.");
         add("reroll.dice.tooltip.warning", "This can't be undone!");
         add("reroll.dice.cooldown", "Dice are on cooldown.");

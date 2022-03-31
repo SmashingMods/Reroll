@@ -1,4 +1,5 @@
 {
+  "block.reroll.grave.grave_normal": "Grave",
   "commands.reroll.all": "All online players have been rerolled.",
   "commands.reroll.item_required": "You need dice to reroll.",
   "commands.reroll.player": "Rerolling for player %s",
