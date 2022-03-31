@@ -135,5 +135,6 @@ public class GraveBlock extends Block implements IWaterLoggable {
                 });
             }
         }
+        pLevel.removeBlockEntity(pPos);
     }
 }
