@@ -1,3 +1,6 @@
+With any luck, this should fix the issues with using Reroll in Trepidation!
+
 # Changes
-- Backport 1.16.5 improvements to 1.12.2. Hopefully this fixes some bugs and makes the code easier to use.
-- Add some improvements to MalekiRe's PR'd code.
+- Add method to dice to allow right clicking on air or on a block.
+- Add "max_tries" config option to prevent reroll from killing a server by loading too many chunks searching for a spawn location.
+- Fix findClosest algorithm by inverting condition and removing unnecessary "continue" statement.

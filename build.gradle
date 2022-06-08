@@ -21,7 +21,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'maven-publish'
 apply plugin: 'java'
 
-version = '1.12.2-1.5.0'
+version = "${minecraft_version}-${mod_version}"
 group = 'com.smashingmods.reroll'
 archivesBaseName = 'reroll'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
