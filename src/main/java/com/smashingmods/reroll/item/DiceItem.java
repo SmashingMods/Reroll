@@ -39,11 +39,32 @@ public class DiceItem extends Item {
 
     @Override
     @Nonnull
-    public EnumActionResult onItemUse(@Nonnull EntityPlayer player, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public ActionResult<ItemStack> onItemRightClick(@Nonnull World world, @Nonnull EntityPlayer player, @Nonnull EnumHand hand) {
+        if (!world.isRemote) {
+            RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
+            Objects.requireNonNull(rerollCapability);
+            if (!rerollCapability.getLock()) {
+                CooldownTracker tracker = player.getCooldownTracker();
+                RerollHandler handler = new RerollHandler();
+                handler.reroll(player.getServer(), (EntityPlayerMP) player, true);
+                tracker.setCooldown(this, Config.cooldown * 20);
+                player.sendMessage(new TextComponentTranslation("commands.reroll.self").setStyle(new Style().setColor(TextFormatting.AQUA)));
+            } else {
+                player.sendMessage(new TextComponentTranslation("commands.reroll.self.locked").setStyle(new Style().setColor(TextFormatting.RED)));
+                return ActionResult.newResult(EnumActionResult.FAIL, new ItemStack(this));
+            }
+            return ActionResult.newResult(EnumActionResult.SUCCESS, new ItemStack(this));
+        }
+        return ActionResult.newResult(EnumActionResult.PASS, new ItemStack(this));
+    }
 
+    @Override
+    @Nonnull
+    public EnumActionResult onItemUse(@Nonnull EntityPlayer player, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
             RerollCapabilityImplementation rerollCapability = player.getCapability(RerollCapability.REROLL_CAPABILITY, null);
-            if (!Objects.requireNonNull(rerollCapability).getLock()) {
+            Objects.requireNonNull(rerollCapability);
+            if (!rerollCapability.getLock()) {
                 CooldownTracker tracker = player.getCooldownTracker();
 
                 RerollHandler handler = new RerollHandler();
