@@ -30,7 +30,6 @@ public class PositionUtil {
 
     public static Predicate<BlockPos> blockStatePredicate(World world) {
         return position ->
-
             getSpawnBlocks().contains(world.getBlockState(position).getBlock()) &&
             world.canBlockSeeSky(position) &&
             world.isAirBlock(position.up(1)) &&
@@ -41,8 +40,9 @@ public class PositionUtil {
 
     public static Optional<BlockPos> findClosest(BlockPos pos, int horizontalRange, int verticalRange, Predicate<BlockPos> condition) {
         for (BlockPos blockPos : iterateOutwards(pos, horizontalRange, verticalRange, horizontalRange)) {
-            if (!condition.test(blockPos)) continue;
-            return Optional.of(blockPos);
+            if (condition.test(blockPos)) {
+                return Optional.of(blockPos);
+            }
         }
         return Optional.empty();
     }

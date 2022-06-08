@@ -19,6 +19,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -32,6 +33,7 @@ import timeisup.network.TimerPacket;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.smashingmods.reroll.util.PositionUtil.blockStatePredicate;
 
@@ -197,7 +199,12 @@ public class RerollHandler {
         } else {
             entityPlayer.setSpawnDimension(entityPlayer.dimension);
         }
-        entityPlayer.setPositionAndUpdate(newPosition.getX(), newPosition.getY() + 2.5f, newPosition.getZ());
+
+        if (newPosition != null) {
+            entityPlayer.setPositionAndUpdate(newPosition.getX(), newPosition.getY() + 2.5f, newPosition.getZ());
+        } else {
+            entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.max_tries"));
+        }
     }
 
     public BlockPos generateValidBlockPos(WorldServer world, boolean next) {
@@ -214,7 +221,16 @@ public class RerollHandler {
 
         if (next) HOLDER.setNext();
         saveSpiral(world, HOLDER.getSpiral());
-        return toReturn.orElseGet(() -> generateValidBlockPos(world, true));
+
+        AtomicReference<Integer> count = new AtomicReference<>(0);
+        return toReturn.orElseGet(() -> {
+            if (count.get() > Config.maxTries) {
+                count.set(count.get() + 1);
+                return generateValidBlockPos(world, true);
+            } else {
+                return null;
+            }
+        });
     }
 
     public NBTTagCompound loadSpiral(World world) {

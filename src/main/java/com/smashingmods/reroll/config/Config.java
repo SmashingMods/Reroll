@@ -22,6 +22,7 @@ public class Config {
     public static boolean startLocked;
     public static int cooldown;
     public static String[] potentialSpawnBlocks;
+    public static int maxTries;
 
     public static int timeisupTimer;
 
@@ -56,6 +57,7 @@ public class Config {
         startLocked = config.getBoolean("Lock Reroll", CATEGORY_REROLL, true, "This is a safety feature to lock the use of reroll at the start. Users are required to use /reroll unlock to use reroll just in case.");
         cooldown = config.getInt("Reroll Cooldown", CATEGORY_REROLL, 60, 30, Integer.MAX_VALUE, "Cooldown time to use reroll dice.");
         potentialSpawnBlocks = config.getStringList("Block Spawn", CATEGORY_REROLL, new String[] { "minecraft:grass", "minecraft:dirt", "minecraft:stone" }, "Sets the resource location for the block you can spawn on.");
+        maxTries = config.getInt("Max Tries", CATEGORY_REROLL, 5, 1, 10, "Maximum number of times to try to find a valid block position for reroll. Rerolling again will reset the count and start from the next reroll position.");
 
         config.addCustomCategoryComment(CATEGORY_COMPAT, "Mod Compatibility Configuration");
         timeisupTimer = config.getInt("Time is up Timer", CATEGORY_COMPAT, 12000, 1200, Integer.MAX_VALUE, "Set the Timer value after a reroll.");

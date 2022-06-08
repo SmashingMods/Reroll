@@ -15,6 +15,7 @@ commands.reroll.self.lock=Reroll locked.
 commands.reroll.self.locked=Reroll locked. Use '/reroll unlock' to unlock yourself.
 commands.reroll.self.unlock=Reroll unlocked. Be careful!
 commands.reroll.all=All online players have been rerolled.
+commands.reroll.max_tries=Reroll failed to find a valid block position. Try again later.
 
 item.reroll.dice.name=Reroll Dice
 reroll.dice.tooltip.description=Use this item to reroll.
