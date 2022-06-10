@@ -11,8 +11,8 @@ public class Config {
     public static String[] rerollItems;
     public static int minDistance;
     public static int maxTries;
-    public static int horizontalRadius;
-    public static int verticalRadius;
+    public static int horizontalRange;
+    public static int verticalRange;
     public static boolean rerollAllTogether;
     public static boolean useCurrentDim;
     public static boolean useOverrideDim;
@@ -49,8 +49,8 @@ public class Config {
         rerollItems = config.getStringList("Reroll Inventory", CATEGORY_REROLL, new String[]{"reroll:dice;1"}, "A list of items that will be added to a player's inventory after using the reroll command.\nYou can add any existing item per line like this: \"minecraft:torch;16\".\nNote that you can only have as many items as there are inventory slots.");
         minDistance = config.getInt("Reroll Minimum Distance", CATEGORY_REROLL, 512, 256, 10240, "Determines the minimum distance to teleport when you reroll.");
         maxTries = config.getInt("Max Tries", CATEGORY_REROLL, 5, 1, 10, "Maximum number of times to try to find a valid block position for reroll. Rerolling again will reset the count and start from the next reroll position.");
-        horizontalRadius = config.getInt("Reroll Horizontal Radius", CATEGORY_REROLL, 256, 16, 2048, "Horizontal radius to search for a reroll position. Larger numbers might cause more lag.");
-        verticalRadius = config.getInt("Reroll Vertical Radius", CATEGORY_REROLL, 64, 16, 256, "Vertical radius to search for a reroll position. Larger numbers might cause more lag.");
+        horizontalRange = config.getInt("Reroll Horizontal Radius", CATEGORY_REROLL, 256, 16, 2048, "Horizontal radius to search for a reroll position. Larger numbers might cause more lag.");
+        verticalRange = config.getInt("Reroll Vertical Radius", CATEGORY_REROLL, 64, 16, 256, "Vertical radius to search for a reroll position. Larger numbers might cause more lag.");
         rerollAllTogether = config.getBoolean("Reroll All Together", CATEGORY_REROLL, false, "Should '/reroll all' send all players to the same location?");
         useOverrideDim = config.getBoolean("Use Override Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set to the override dimension? If false, defaults to player spawn dimension.");
         useCurrentDim = config.getBoolean("Use Current Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set in the player's current dimension? If false, defaults to player spawn dimension.");

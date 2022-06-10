@@ -1,5 +1,4 @@
-package com.smashingmods.reroll.util;
-
+package com.smashingmods.reroll.core;
 
 import com.smashingmods.reroll.Reroll;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;

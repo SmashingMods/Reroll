@@ -200,7 +200,7 @@ public class RerollHandler {
         double posZ = spiral.getInteger("posZ") * Config.minDistance;
         int seaLevel = world.getSeaLevel();
 
-        Optional<BlockPos> toReturn = PositionUtil.findClosest(new BlockPos(posX, seaLevel, posZ), Config.horizontalRadius, Config.verticalRadius, blockStatePredicate(world));
+        Optional<BlockPos> toReturn = PositionUtil.findClosest(new BlockPos(posX, seaLevel, posZ), Config.horizontalRange, Config.verticalRange, blockStatePredicate(world));
 
         if (next) HOLDER.setNext();
         saveSpiral(world, HOLDER.getSpiral());

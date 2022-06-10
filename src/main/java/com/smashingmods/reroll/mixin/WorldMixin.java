@@ -1,5 +1,7 @@
-package com.smashingmods.reroll.util;
+package com.smashingmods.reroll.mixin;
 
+import com.smashingmods.reroll.config.Config;
+import com.smashingmods.reroll.util.PositionUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
@@ -14,16 +16,16 @@ import java.util.Optional;
 @Mixin(World.class)
 public class WorldMixin {
     @Inject(method = "onEntityAdded", at = @At("RETURN"))
-    public void onEntityAddedFunc(Entity e, CallbackInfo ci) {
-        if(e instanceof EntityPlayer) {
-            setPlayerToBlock((EntityPlayer) e);
+    public void onEntityAddedFunc(Entity entity, CallbackInfo callbackInfo) {
+        if (entity instanceof EntityPlayer) {
+            setPlayerToBlock((EntityPlayer) entity);
         }
     }
 
     private void setPlayerToBlock(EntityPlayer player) {
         BlockPos currentPosition = player.getPosition();
         World world = player.getEntityWorld();
-        Optional<BlockPos> spawnBlock = PositionUtil.findClosest(currentPosition, 64, world.getActualHeight() / 4, PositionUtil.blockStatePredicate(world));
+        Optional<BlockPos> spawnBlock = PositionUtil.findClosest(currentPosition, Config.horizontalRange, Config.verticalRange, PositionUtil.blockStatePredicate(world));
         spawnBlock.ifPresent(blockPos -> player.setPositionAndUpdate(blockPos.getX(), blockPos.getY() + 0.5f, blockPos.getZ()));
     }
 }

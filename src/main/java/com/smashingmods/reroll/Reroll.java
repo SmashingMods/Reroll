@@ -38,8 +38,6 @@ public class Reroll {
     // Mod Compatibility
     public static boolean MODCOMPAT_TIMEISUP;
     public static boolean MODCOMPAT_BAUBLES;
-    public static boolean MODCOMPAT_GAMESSTAGES;
-    public static boolean MODCOMPAT_ENDERSKILLS;
 
     @GameRegistry.ObjectHolder(DiceItem.name)
     public static final Item diceItem = Items.AIR;
@@ -64,8 +62,6 @@ public class Reroll {
     public void postInit(FMLPostInitializationEvent event) {
         MODCOMPAT_TIMEISUP = Loader.isModLoaded("timeisup");
         MODCOMPAT_BAUBLES = Loader.isModLoaded("baubles");
-        MODCOMPAT_GAMESSTAGES = Loader.isModLoaded("gamestages");
-        MODCOMPAT_ENDERSKILLS = Loader.isModLoaded("enderskills");
 
         if (CONFIG.hasChanged()) {
             CONFIG.save();
