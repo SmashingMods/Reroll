@@ -1,4 +1,4 @@
-package com.smashingmods.reroll.core;
+package com.smashingmods.reroll.util;
 
 
 import com.smashingmods.reroll.Reroll;

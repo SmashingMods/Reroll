@@ -3,7 +3,6 @@ package com.smashingmods.reroll.util;
 import com.google.common.collect.AbstractIterator;
 import com.smashingmods.reroll.config.Config;
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -75,21 +74,16 @@ public class PositionUtil {
                 BlockPos.MutableBlockPos blockPos = null;
 
                 while (blockPos == null) {
-
                     if (this.dy > this.limitY) {
                         ++this.dx;
-
                         if (this.dx > this.limitX) {
                             ++this.manhattanDistance;
-
                             if (this.manhattanDistance > range) {
                                 return this.endOfData();
                             }
-
                             this.limitX = Math.min(rangeX, this.manhattanDistance);
                             this.dx = -this.limitX;
                         }
-
                         this.limitY = Math.min(rangeY, this.manhattanDistance - Math.abs(this.dx));
                         this.dy = -this.limitY;
                     }

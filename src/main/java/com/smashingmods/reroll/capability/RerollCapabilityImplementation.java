@@ -6,40 +6,40 @@ import javax.annotation.Nonnull;
 
 public class RerollCapabilityImplementation implements RerollCapabilityInterface {
 
-    private static boolean ITEMS_RECEIVED = false;
-    private static boolean LOCK = false;
+    private boolean itemsReceived = false;
+    private boolean locked = false;
 
     @Override
     public boolean getItemsReceived() {
-        return ITEMS_RECEIVED;
+        return itemsReceived;
     }
 
     @Override
     public void setItemsReceived(boolean itemsReceived) {
-        ITEMS_RECEIVED = itemsReceived;
+        this.itemsReceived = itemsReceived;
     }
 
     @Override
     public boolean getLock() {
-        return LOCK;
+        return locked;
     }
 
     @Override
     public void setLock(boolean lock) {
-        LOCK = lock;
+        locked = lock;
     }
 
     @Override
     public NBTTagCompound serializeNBT() {
         final NBTTagCompound tag = new NBTTagCompound();
-        tag.setBoolean("recieved", ITEMS_RECEIVED);
-        tag.setBoolean("locked", LOCK);
+        tag.setBoolean("recieved", itemsReceived);
+        tag.setBoolean("locked", locked);
         return tag;
     }
 
     @Override
     public void deserializeNBT(@Nonnull NBTTagCompound nbt) {
-        ITEMS_RECEIVED = nbt.getBoolean("received");
-        LOCK = nbt.getBoolean("locked");
+        itemsReceived = nbt.getBoolean("received");
+        locked = nbt.getBoolean("locked");
     }
 }

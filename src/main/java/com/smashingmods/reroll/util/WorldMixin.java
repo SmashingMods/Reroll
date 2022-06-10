@@ -1,6 +1,5 @@
-package com.smashingmods.reroll.mixin;
+package com.smashingmods.reroll.util;
 
-import com.smashingmods.reroll.util.PositionUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;

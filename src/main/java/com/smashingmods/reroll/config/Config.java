@@ -10,6 +10,9 @@ public class Config {
     public static boolean requireItem;
     public static String[] rerollItems;
     public static int minDistance;
+    public static int maxTries;
+    public static int horizontalRadius;
+    public static int verticalRadius;
     public static boolean rerollAllTogether;
     public static boolean useCurrentDim;
     public static boolean useOverrideDim;
@@ -22,7 +25,6 @@ public class Config {
     public static boolean startLocked;
     public static int cooldown;
     public static String[] potentialSpawnBlocks;
-    public static int maxTries;
 
     public static int timeisupTimer;
 
@@ -45,6 +47,9 @@ public class Config {
         requireItem = config.getBoolean("Require Dice", CATEGORY_REROLL, true, "Using Reroll requires Reroll Dice. Disables the /reroll command for non-OP players.");
         rerollItems = config.getStringList("Reroll Inventory", CATEGORY_REROLL, new String[]{"reroll:dice;1"}, "A list of items that will be added to a player's inventory after using the reroll command.\nYou can add any existing item per line like this: \"minecraft:torch;16\".\nNote that you can only have as many items as there are inventory slots.");
         minDistance = config.getInt("Reroll Minimum Distance", CATEGORY_REROLL, 512, 256, 10240, "Determines the minimum distance to teleport when you reroll.");
+        maxTries = config.getInt("Max Tries", CATEGORY_REROLL, 5, 1, 10, "Maximum number of times to try to find a valid block position for reroll. Rerolling again will reset the count and start from the next reroll position.");
+        horizontalRadius = config.getInt("Reroll Horizontal Radius", CATEGORY_REROLL, 256, 16, 2048, "Horizontal radius to search for a reroll position. Larger numbers might cause more lag.");
+        verticalRadius = config.getInt("Reroll Vertical Radius", CATEGORY_REROLL, 64, 16, 256, "Vertical radius to search for a reroll position. Larger numbers might cause more lag.");
         rerollAllTogether = config.getBoolean("Reroll All Together", CATEGORY_REROLL, false, "Should '/reroll all' send all players to the same location?");
         useOverrideDim = config.getBoolean("Use Override Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set to the override dimension? If false, defaults to player spawn dimension.");
         useCurrentDim = config.getBoolean("Use Current Dimension", CATEGORY_REROLL, false, "Should reroll spawn location be set in the player's current dimension? If false, defaults to player spawn dimension.");
@@ -57,7 +62,6 @@ public class Config {
         startLocked = config.getBoolean("Lock Reroll", CATEGORY_REROLL, true, "This is a safety feature to lock the use of reroll at the start. Users are required to use /reroll unlock to use reroll just in case.");
         cooldown = config.getInt("Reroll Cooldown", CATEGORY_REROLL, 60, 30, Integer.MAX_VALUE, "Cooldown time to use reroll dice.");
         potentialSpawnBlocks = config.getStringList("Block Spawn", CATEGORY_REROLL, new String[] { "minecraft:grass", "minecraft:dirt", "minecraft:stone" }, "Sets the resource location for the block you can spawn on.");
-        maxTries = config.getInt("Max Tries", CATEGORY_REROLL, 5, 1, 10, "Maximum number of times to try to find a valid block position for reroll. Rerolling again will reset the count and start from the next reroll position.");
 
         config.addCustomCategoryComment(CATEGORY_COMPAT, "Mod Compatibility Configuration");
         timeisupTimer = config.getInt("Time is up Timer", CATEGORY_COMPAT, 12000, 1200, Integer.MAX_VALUE, "Set the Timer value after a reroll.");
