@@ -58,7 +58,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compile fg.deobf("curse.maven:timeisup-437596:3511732")
     compile fg.deobf("curse.maven:baubles-227083:2518667")
-    compile fg.deobf("curse.maven:enderskills-391325:3523964")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {

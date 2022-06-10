@@ -25,6 +25,7 @@ public class Config {
     public static boolean startLocked;
     public static int cooldown;
     public static String[] potentialSpawnBlocks;
+    public static String[] additionalCommands;
 
     public static int timeisupTimer;
 
@@ -62,6 +63,7 @@ public class Config {
         startLocked = config.getBoolean("Lock Reroll", CATEGORY_REROLL, true, "This is a safety feature to lock the use of reroll at the start. Users are required to use /reroll unlock to use reroll just in case.");
         cooldown = config.getInt("Reroll Cooldown", CATEGORY_REROLL, 60, 30, Integer.MAX_VALUE, "Cooldown time to use reroll dice.");
         potentialSpawnBlocks = config.getStringList("Block Spawn", CATEGORY_REROLL, new String[] { "minecraft:grass", "minecraft:dirt", "minecraft:stone" }, "Sets the resource location for the block you can spawn on.");
+        additionalCommands = config.getStringList("Additional Commands", CATEGORY_REROLL, new String[] {"advancement revoke @p everything"}, "You can use most valid commands. '@p' will replace wil the player's name. You can also use format strings. Examples: 'say hello world', 'advancement revoke @p everything', 'say hello %s, you are %s!;playername;amazing'");
 
         config.addCustomCategoryComment(CATEGORY_COMPAT, "Mod Compatibility Configuration");
         timeisupTimer = config.getInt("Time is up Timer", CATEGORY_COMPAT, 12000, 1200, Integer.MAX_VALUE, "Set the Timer value after a reroll.");

@@ -1,7 +1,5 @@
 package com.smashingmods.reroll.handler;
 
-import arekkuusu.enderskills.api.capability.AdvancementCapability;
-import arekkuusu.enderskills.api.capability.Capabilities;
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
 import com.smashingmods.reroll.Reroll;
@@ -50,21 +48,22 @@ public class RerollHandler {
     public void reroll(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next, @Nullable Item usedItem) {
 
         resetInventory(entityPlayer);
-        server.getCommandManager().executeCommand(server, String.format("/advancement revoke %s everything", entityPlayer.getName()));
         resetLocation(server, entityPlayer, next);
         if (Config.setNewInventory) {
             InventoryHandler.setInventory(entityPlayer, Config.rerollItems);
         }
         resetData(entityPlayer);
-        resetModData(server, entityPlayer);
+        resetModData(entityPlayer);
 
         if (usedItem instanceof DiceItem) {
             CooldownTracker tracker = entityPlayer.getCooldownTracker();
             tracker.setCooldown(usedItem, Config.cooldown * 20);
         }
+
+        executeAdditionalCommands(server, entityPlayer);
     }
 
-    public List<BlockPos> generateValidChestPosition(World world, BlockPos position) {
+    private List<BlockPos> generateValidChestPosition(World world, BlockPos position) {
 
         List<BlockPos> directions = new ArrayList<>();
         directions.add(position.north());
@@ -91,7 +90,7 @@ public class RerollHandler {
         }
     }
 
-    public void resetInventory(EntityPlayerMP entityPlayer) {
+    private void resetInventory(EntityPlayerMP entityPlayer) {
 
         if (Config.sendInventoryToChest && !entityPlayer.inventory.isEmpty()) {
             World world = entityPlayer.getEntityWorld();
@@ -117,7 +116,7 @@ public class RerollHandler {
         entityPlayer.inventory.dropAllItems();
     }
 
-    public void resetData(EntityPlayerMP entityPlayer) {
+    private void resetData(EntityPlayerMP entityPlayer) {
 
         entityPlayer.setHealth(entityPlayer.getMaxHealth());
         entityPlayer.setAir(300);
@@ -137,7 +136,7 @@ public class RerollHandler {
         entityPlayer.extinguish();
     }
 
-    public void resetModData(MinecraftServer server, EntityPlayerMP entityPlayer) {
+    private void resetModData(EntityPlayerMP entityPlayer) {
         if (Reroll.MODCOMPAT_TIMEISUP) {
             TimerCapability timer = entityPlayer.getCapability(TimeIsUp.TIMER, null);
 
@@ -154,24 +153,9 @@ public class RerollHandler {
             BaublesInventoryWrapper wrapper = new BaublesInventoryWrapper(BaublesApi.getBaublesHandler(entityPlayer));
             wrapper.clear();
         }
-
-        if (Reroll.MODCOMPAT_GAMESSTAGES) {
-            server.getCommandManager().executeCommand(server, String.format("/gamestage clear %s", entityPlayer.getName()));
-        }
-
-        if (Reroll.MODCOMPAT_ENDERSKILLS) {
-            AdvancementCapability esadvancements = entityPlayer.getCapability(Capabilities.ADVANCEMENT, null);
-            Objects.requireNonNull(esadvancements).consumeExperienceFromTotal(entityPlayer, Integer.MAX_VALUE);
-
-            server.getCommandManager().executeCommand(server, String.format("/es_advancement %s retries set 0", entityPlayer.getName()));
-            server.getCommandManager().executeCommand(server, String.format("/es_advancement %s level set 1", entityPlayer.getName()));
-            server.getCommandManager().executeCommand(server, String.format("/es_skill %s reset", entityPlayer.getName()));
-            server.getCommandManager().executeCommand(server, String.format("/es_cooldown %s reset", entityPlayer.getName()));
-            server.getCommandManager().executeCommand(server, String.format("/es_endurance %s reset", entityPlayer.getName()));
-        }
     }
 
-    public void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
+    private void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
 
         WorldServer world;
         BlockPos newPosition;
@@ -207,7 +191,7 @@ public class RerollHandler {
         }
     }
 
-    public BlockPos generateValidBlockPos(WorldServer world, boolean next) {
+    private BlockPos generateValidBlockPos(WorldServer world, boolean next) {
 
         HOLDER.setSpiral(loadSpiral(world));
         NBTTagCompound spiral = HOLDER.getSpiral();
@@ -251,5 +235,32 @@ public class RerollHandler {
     public void setNext(World world) {
         HOLDER.setNext();
         saveSpiral(world, HOLDER.getSpiral());
+    }
+
+    private void executeAdditionalCommands(MinecraftServer server, EntityPlayerMP entityPlayer) {
+
+        for (String configString : Config.additionalCommands) {
+            String commandToExecute = "";
+
+            if (configString.contains(";")) {
+                String[] commandArray = configString.split(";");
+                if (commandArray.length > 1 || !commandArray[0].contains("%s")) {
+                    String[] formatObject = Arrays.copyOfRange(commandArray, 1, commandArray.length);
+                    commandToExecute = String.format(commandArray[0], (Object[]) formatObject);
+                } else {
+                    Reroll.LOGGER.error("Incorrectly formatted additional command list. Example: 'say hello world' or 'say hello %s;player'");
+                    Reroll.LOGGER.error(configString);
+                }
+            } else {
+                commandToExecute = configString;
+            }
+
+            if (!commandToExecute.isEmpty()) {
+                if (commandToExecute.contains("@p")) {
+                    commandToExecute = commandToExecute.replace("@p", entityPlayer.getName());
+                }
+                server.getCommandManager().executeCommand(server, commandToExecute);
+            }
+        }
     }
 }
