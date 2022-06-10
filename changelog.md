@@ -1,6 +1,5 @@
-With any luck, this should fix the issues with using Reroll in Trepidation!
-
 # Changes
-- Add method to dice to allow right clicking on air or on a block.
-- Add "max_tries" config option to prevent reroll from killing a server by loading too many chunks searching for a spawn location.
-- Fix findClosest algorithm by inverting condition and removing unnecessary "continue" statement.
+- Move some files around because there didn't need to be 3 unique directories for 1 file each.
+- Fix reroll capability having 2 static fields.
+- Add configurable radius for reroll spawn block searching.
+- Set cooldown on dice on player login if they are in inventory.
