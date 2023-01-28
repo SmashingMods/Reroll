@@ -26,6 +26,6 @@ public class WorldMixin {
         BlockPos currentPosition = player.getPosition();
         World world = player.getEntityWorld();
         Optional<BlockPos> spawnBlock = PositionUtil.findClosest(currentPosition, Config.horizontalRange, Config.verticalRange, PositionUtil.blockStatePredicate(world));
-        spawnBlock.ifPresent(blockPos -> player.setPositionAndUpdate(blockPos.getX(), blockPos.getY() + 0.5f, blockPos.getZ()));
+        spawnBlock.ifPresent(blockPos -> player.setPositionAndUpdate(blockPos.getX() + 0.5d, blockPos.getY() + 1.5d, blockPos.getZ() + 0.5d));
     }
 }
