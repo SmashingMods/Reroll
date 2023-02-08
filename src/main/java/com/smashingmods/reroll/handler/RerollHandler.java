@@ -185,7 +185,7 @@ public class RerollHandler {
         }
 
         if (newPosition != null) {
-            entityPlayer.setPositionAndUpdate(newPosition.getX(), newPosition.getY() + 2.5f, newPosition.getZ());
+            entityPlayer.setPositionAndUpdate(newPosition.getX() + 0.5d, newPosition.getY() + 1.5d, newPosition.getZ() + 0.5d);
         } else {
             entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.max_tries"));
         }
