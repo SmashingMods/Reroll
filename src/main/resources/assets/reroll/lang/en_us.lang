@@ -17,7 +17,7 @@ commands.reroll.self.unlock=Reroll unlocked. Be careful!
 commands.reroll.all=All online players have been rerolled.
 commands.reroll.max_tries=Reroll failed to find a valid block position. Try again later.
 
-item.reroll.dice.name=Reroll Dice
+item.reroll:dice.name=Reroll Dice
 reroll.dice.tooltip.description=Use this item to reroll.
 reroll.dice.tooltip.warning=This can't be undone!
 reroll.dice.cooldown=Dice are on cooldown.
