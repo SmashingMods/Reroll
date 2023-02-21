@@ -151,7 +151,7 @@ public class RerollHandler {
 
         if (Reroll.MODCOMPAT_BAUBLES) {
             BaublesInventoryWrapper wrapper = new BaublesInventoryWrapper(BaublesApi.getBaublesHandler(entityPlayer));
-            wrapper.clear();
+            wrapper.func_174888_l();
         }
     }
 
