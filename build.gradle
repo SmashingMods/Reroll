@@ -71,46 +71,46 @@ jar {
 
 jar.finalizedBy('reobfJar')
 
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//            artifact jar
-//        }
-//    }
-//    repositories {
-//        maven {
-//            url "file:///${project.projectDir}/mcmodsrepo"
-//        }
-//    }
-//}
-//
-//def secrets = new Properties()
-//file('secrets.properties').withInputStream {
-//    stream -> secrets.load(stream)
-//}
-//
-//fileTree("secrets").matching {
-//    include "**/*.properties"
-//}.each {
-//    File file ->
-//        file.withInputStream {
-//            stream -> secrets.load(stream)
-//        }
-//}
-//
-//curseforge {
-//    apiKey = secrets.getProperty("apiKey")
-//    project {
-//        id = '592315'
-//        releaseType = 'release'
-//        changelogType = 'markdown'
-//        changelog = file("changelog.md")
-//        addGameVersion 'Forge'
-//        addGameVersion 'Java 12'
-//        addGameVersion '1.12.2'
-//
-//        mainArtifact(jar) {
-//            displayName = "Reroll $project.version"
-//        }
-//    }
-//}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+def secrets = new Properties()
+file('secrets.properties').withInputStream {
+    stream -> secrets.load(stream)
+}
+
+fileTree("secrets").matching {
+    include "**/*.properties"
+}.each {
+    File file ->
+        file.withInputStream {
+            stream -> secrets.load(stream)
+        }
+}
+
+curseforge {
+    apiKey = secrets.getProperty("apiKey")
+    project {
+        id = '592315'
+        releaseType = 'release'
+        changelogType = 'markdown'
+        changelog = file("changelog.md")
+        addGameVersion 'Forge'
+        addGameVersion 'Java 12'
+        addGameVersion '1.12.2'
+
+        mainArtifact(jar) {
+            displayName = "Reroll $project.version"
+        }
+    }
+}

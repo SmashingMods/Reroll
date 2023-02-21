@@ -7,7 +7,6 @@ import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.handler.InventoryHandler;
 import com.smashingmods.reroll.item.DiceItem;
 import com.smashingmods.reroll.util.PositionUtil;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
