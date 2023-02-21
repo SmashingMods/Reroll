@@ -2,13 +2,11 @@ buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net/' }
         maven { url = 'https://files.minecraftforge.net/maven' }
-        maven { url = "https://repo.spongepowered.org/maven" }
         jcenter()
         mavenCentral()
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 plugins {
@@ -17,7 +15,6 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'maven-publish'
 apply plugin: 'java'
 
@@ -38,11 +35,9 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
-            property 'fml.coreMods.load', 'com.smashingmods.reroll.core.CoreMod'
         }
 
         server {
-            property 'fml.coreMods.load', 'com.smashingmods.reroll.core.CoreMod'
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
         }
@@ -58,18 +53,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compile fg.deobf("curse.maven:timeisup-437596:3511732")
     compile fg.deobf("curse.maven:baubles-227083:2518667")
-
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
-        exclude module: 'guava'
-        exclude module: 'commons-io'
-        exclude module: 'gson'
-    }
-}
-
-mixin {
-    add sourceSets.main, 'refmap.reroll.json'
-    config 'mixins.reroll.json'
 }
 
 jar {
@@ -83,57 +66,51 @@ jar {
             "Implementation-Vendor" :"SmashingMods",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
-        attributes "FMLCorePlugin": 'com.smashingmods.reroll.core.CoreMod'
-        attributes "FMLCorePluginContainsFMLMod": "true"
-        attributes "ForceLoadAsMod": "true"
-        attributes "TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
-        attributes "TweakOrder": "0"
-        attributes "MixinConfigs": mod_mixin_configs.replace('${mod_id}', mod_id)
     }
 }
 
 jar.finalizedBy('reobfJar')
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
-        }
-    }
-}
-
-def secrets = new Properties()
-file('secrets.properties').withInputStream {
-    stream -> secrets.load(stream)
-}
-
-fileTree("secrets").matching {
-    include "**/*.properties"
-}.each {
-    File file ->
-        file.withInputStream {
-            stream -> secrets.load(stream)
-        }
-}
-
-curseforge {
-    apiKey = secrets.getProperty("apiKey")
-    project {
-        id = '592315'
-        releaseType = 'release'
-        changelogType = 'markdown'
-        changelog = file("changelog.md")
-        addGameVersion 'Forge'
-        addGameVersion 'Java 12'
-        addGameVersion '1.12.2'
-
-        mainArtifact(jar) {
-            displayName = "Reroll $project.version"
-        }
-    }
-}
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            artifact jar
+//        }
+//    }
+//    repositories {
+//        maven {
+//            url "file:///${project.projectDir}/mcmodsrepo"
+//        }
+//    }
+//}
+//
+//def secrets = new Properties()
+//file('secrets.properties').withInputStream {
+//    stream -> secrets.load(stream)
+//}
+//
+//fileTree("secrets").matching {
+//    include "**/*.properties"
+//}.each {
+//    File file ->
+//        file.withInputStream {
+//            stream -> secrets.load(stream)
+//        }
+//}
+//
+//curseforge {
+//    apiKey = secrets.getProperty("apiKey")
+//    project {
+//        id = '592315'
+//        releaseType = 'release'
+//        changelogType = 'markdown'
+//        changelog = file("changelog.md")
+//        addGameVersion 'Forge'
+//        addGameVersion 'Java 12'
+//        addGameVersion '1.12.2'
+//
+//        mainArtifact(jar) {
+//            displayName = "Reroll $project.version"
+//        }
+//    }
+//}
