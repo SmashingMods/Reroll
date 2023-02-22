@@ -2,6 +2,7 @@ package com.smashingmods.reroll.handler;
 
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
+import com.elenai.elenaidodge2.api.FeathersHelper;
 import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.capability.WorldSavedData;
 import com.smashingmods.reroll.config.Config;
@@ -152,6 +153,10 @@ public class RerollHandler {
         if (Reroll.MODCOMPAT_BAUBLES) {
             BaublesInventoryWrapper wrapper = new BaublesInventoryWrapper(BaublesApi.getBaublesHandler(entityPlayer));
             wrapper.func_174888_l();
+        }
+
+        if (Reroll.MODCOMPAT_ELENAIDODGE) {
+            FeathersHelper.increaseFeathers(entityPlayer, 20);
         }
     }
 
