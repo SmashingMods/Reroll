@@ -5,16 +5,13 @@ import com.smashingmods.reroll.capability.RerollCapability;
 import com.smashingmods.reroll.capability.RerollCapabilityImplementation;
 import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.handler.InventoryHandler;
+import com.smashingmods.reroll.handler.RerollHandler;
 import com.smashingmods.reroll.item.DiceItem;
-import com.smashingmods.reroll.util.PositionUtil;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
@@ -34,10 +31,11 @@ public class PlayerLoginEvent {
             // Set tag to prevent initial settings every login
             event.player.getTags().add("joined");
 
-            setPlayerToBlock(event.player);
-
             if (event.player instanceof EntityPlayerMP) {
                 EntityPlayerMP entityPlayer = (EntityPlayerMP) event.player;
+
+                RerollHandler handler = new RerollHandler();
+                handler.resetLocation(entityPlayer.getServer(), entityPlayer, true);
 
                 setInitialCooldown(entityPlayer);
 
@@ -56,14 +54,6 @@ public class PlayerLoginEvent {
                 }
             }
         }
-    }
-
-    private static void setPlayerToBlock(EntityPlayer player) {
-        BlockPos currentPosition = player.getPosition();
-        World world = player.getEntityWorld();
-        Optional<BlockPos> spawnBlock = PositionUtil.findClosest(currentPosition, Config.horizontalRange, Config.verticalRange, PositionUtil.blockStatePredicate(world));
-        spawnBlock.ifPresent(blockPos -> player.setPositionAndUpdate(blockPos.getX() + 0.5d, blockPos.getY() + 1.5d, blockPos.getZ() + 0.5d));
-        spawnBlock.ifPresent(blockPos -> Reroll.LOGGER.info("Player {} was teleported to a suitable spawn block at {}, {}, {}", player.getName(), blockPos.getX() + 0.5d, blockPos.getY() + 1.5d, blockPos.getZ() + 0.5d));
     }
 
     private static void setInitialCooldown(EntityPlayerMP entityPlayer) {

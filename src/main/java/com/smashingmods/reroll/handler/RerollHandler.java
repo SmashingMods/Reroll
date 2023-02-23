@@ -160,7 +160,7 @@ public class RerollHandler {
         }
     }
 
-    private void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
+    public void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
 
         WorldServer world;
         BlockPos newPosition;
