@@ -179,8 +179,6 @@ public class RerollHandler {
             world = server.getWorld(entityPlayer.getSpawnDimension());
         }
 
-        newPosition = generateValidBlockPos(world, next);
-
         if (!Config.useCurrentDim) {
             CommandSetDimension setDimension = new CommandSetDimension();
             try {
@@ -195,11 +193,10 @@ public class RerollHandler {
             entityPlayer.setSpawnDimension(entityPlayer.dimension);
         }
 
+        newPosition = generateValidBlockPos(world, next);
+
         if (newPosition != null) {
-            Reroll.LOGGER.debug("Old reroll position: " + PositionUtil.oldPos);
-            Reroll.LOGGER.debug("New reroll position: " + newPosition);
             entityPlayer.setPositionAndUpdate(newPosition.getX() + 0.5d, newPosition.getY() + 1.5d, newPosition.getZ() + 0.5d);
-            PositionUtil.oldPos = newPosition;
         } else {
             entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.max_tries"));
         }

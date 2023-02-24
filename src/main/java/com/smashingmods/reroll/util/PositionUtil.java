@@ -16,8 +16,6 @@ import java.util.function.Predicate;
 
 public class PositionUtil {
 
-    public static BlockPos oldPos;
-
     public static List<Block> getSpawnBlocks() {
         List<Block> blocks = new ArrayList<>();
 
@@ -31,8 +29,6 @@ public class PositionUtil {
 
     public static Predicate<BlockPos> blockStatePredicate(World world) {
         return position ->
-            (oldPos == null || position.getX() < oldPos.getX() - (Config.horizontalRange / 2) || position.getX() > oldPos.getX() + (Config.horizontalRange / 2)) &&
-            (oldPos == null || position.getZ() < oldPos.getZ() - (Config.horizontalRange / 2) || position.getZ() > oldPos.getZ() + (Config.horizontalRange / 2)) &&
             getSpawnBlocks().contains(world.getBlockState(position).getBlock()) &&
             world.canBlockSeeSky(position) &&
             world.isAirBlock(position.up(1)) &&

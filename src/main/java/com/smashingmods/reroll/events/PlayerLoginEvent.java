@@ -34,9 +34,6 @@ public class PlayerLoginEvent {
             if (event.player instanceof EntityPlayerMP) {
                 EntityPlayerMP entityPlayer = (EntityPlayerMP) event.player;
 
-                RerollHandler handler = new RerollHandler();
-                handler.resetLocation(entityPlayer.getServer(), entityPlayer, true);
-
                 setInitialCooldown(entityPlayer);
 
                 RerollCapabilityImplementation rerollCapability = entityPlayer.getCapability(RerollCapability.REROLL_CAPABILITY, null);
@@ -52,6 +49,10 @@ public class PlayerLoginEvent {
                         rerollCapability.setLock(true);
                     }
                 }
+
+                RerollHandler handler = new RerollHandler();
+                handler.resetLocation(entityPlayer.getServer(), entityPlayer, true);
+                handler.resetLocation(entityPlayer.getServer(), entityPlayer, true);
             }
         }
     }
