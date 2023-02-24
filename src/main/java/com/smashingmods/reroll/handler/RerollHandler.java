@@ -2,7 +2,9 @@ package com.smashingmods.reroll.handler;
 
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
-import com.elenai.elenaidodge2.api.FeathersHelper;
+import com.elenai.elenaidodge2.capability.dodges.DodgesProvider;
+import com.elenai.elenaidodge2.capability.dodges.IDodges;
+import com.elenai.elenaidodge2.network.message.CUpdateDodgeMessage;
 import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.capability.WorldSavedData;
 import com.smashingmods.reroll.config.Config;
@@ -156,7 +158,11 @@ public class RerollHandler {
         }
 
         if (Reroll.MODCOMPAT_ELENAIDODGE) {
-            FeathersHelper.increaseFeathers(entityPlayer, 20);
+            IDodges dodges = entityPlayer.getCapability(DodgesProvider.DODGES_CAP, null);
+            if (dodges != null) {
+                dodges.set(20);
+                com.elenai.elenaidodge2.network.PacketHandler.instance.sendTo(new CUpdateDodgeMessage(dodges.getDodges()), entityPlayer);
+            }
         }
     }
 
