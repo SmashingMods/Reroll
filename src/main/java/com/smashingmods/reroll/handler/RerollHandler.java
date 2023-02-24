@@ -196,7 +196,10 @@ public class RerollHandler {
         }
 
         if (newPosition != null) {
+            Reroll.LOGGER.debug("Old reroll position: " + PositionUtil.oldPos);
+            Reroll.LOGGER.debug("New reroll position: " + newPosition);
             entityPlayer.setPositionAndUpdate(newPosition.getX() + 0.5d, newPosition.getY() + 1.5d, newPosition.getZ() + 0.5d);
+            PositionUtil.oldPos = newPosition;
         } else {
             entityPlayer.sendMessage(new TextComponentTranslation("commands.reroll.max_tries"));
         }
