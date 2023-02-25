@@ -26,7 +26,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.server.command.CommandSetDimension;
-import net.silentchaos512.scalinghealth.utils.SHPlayerDataHandler;
 import timeisup.TimeIsUp;
 import timeisup.capabilities.Timer;
 import timeisup.capabilities.TimerCapability;
@@ -167,11 +166,7 @@ public class RerollHandler {
         }
 
         if (Reroll.SCALING_HEALTH) {
-            SHPlayerDataHandler.PlayerData playerData = SHPlayerDataHandler.get(entityPlayer);
-            if (playerData != null) {
-                entityPlayer.setHealth(net.silentchaos512.scalinghealth.config.Config.Player.Health.startingHealth);
-                playerData.setMaxHealth(net.silentchaos512.scalinghealth.config.Config.Player.Health.startingHealth);
-            }
+            ScalingHealthHandler.setScalingHealth(entityPlayer);
         }
     }
 
