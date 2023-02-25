@@ -26,6 +26,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.server.command.CommandSetDimension;
+import net.silentchaos512.scalinghealth.utils.SHPlayerDataHandler;
 import timeisup.TimeIsUp;
 import timeisup.capabilities.Timer;
 import timeisup.capabilities.TimerCapability;
@@ -162,6 +163,13 @@ public class RerollHandler {
             if (dodges != null) {
                 dodges.set(20);
                 com.elenai.elenaidodge2.network.PacketHandler.instance.sendTo(new CUpdateDodgeMessage(dodges.getDodges()), entityPlayer);
+            }
+        }
+
+        if (Reroll.SCALING_HEALTH) {
+            SHPlayerDataHandler.PlayerData playerData = SHPlayerDataHandler.get(entityPlayer);
+            if (playerData != null) {
+                entityPlayer.setHealth(playerData.getMaxHealth());
             }
         }
     }

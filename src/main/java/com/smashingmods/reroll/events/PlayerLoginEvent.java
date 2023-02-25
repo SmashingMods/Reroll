@@ -8,6 +8,7 @@ import com.smashingmods.reroll.handler.InventoryHandler;
 import com.smashingmods.reroll.handler.RerollHandler;
 import com.smashingmods.reroll.item.DiceItem;
 import com.smashingmods.reroll.util.PositionUtil;
+import net.silentchaos512.scalinghealth.utils.SHPlayerDataHandler;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -54,6 +55,13 @@ public class PlayerLoginEvent {
                     }
                     if (Config.startLocked) {
                         rerollCapability.setLock(true);
+                    }
+                }
+
+                if (Reroll.SCALING_HEALTH) {
+                    SHPlayerDataHandler.PlayerData playerData = SHPlayerDataHandler.get(entityPlayer);
+                    if (playerData != null) {
+                        entityPlayer.setHealth(playerData.getMaxHealth());
                     }
                 }
             }

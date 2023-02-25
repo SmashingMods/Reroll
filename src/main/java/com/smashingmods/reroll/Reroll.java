@@ -39,6 +39,7 @@ public class Reroll {
     public static boolean MODCOMPAT_TIMEISUP;
     public static boolean MODCOMPAT_BAUBLES;
     public static boolean MODCOMPAT_ELENAIDODGE;
+    public static boolean SCALING_HEALTH;
 
     @GameRegistry.ObjectHolder(DiceItem.name)
     public static final Item diceItem = Items.AIR;
@@ -64,6 +65,7 @@ public class Reroll {
         MODCOMPAT_TIMEISUP = Loader.isModLoaded("timeisup");
         MODCOMPAT_BAUBLES = Loader.isModLoaded("baubles");
         MODCOMPAT_ELENAIDODGE = Loader.isModLoaded("elenaidodge2");
+        SCALING_HEALTH = Loader.isModLoaded("scalinghealth");
 
         if (CONFIG.hasChanged()) {
             CONFIG.save();

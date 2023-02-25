@@ -54,6 +54,8 @@ dependencies {
     compile fg.deobf("curse.maven:timeisup-437596:3511732")
     compile fg.deobf("curse.maven:baubles-227083:2518667")
     compile fg.deobf("curse.maven:elenaidodge2-442962:3343308")
+    compile fg.deobf("curse.maven:silent-lib-242998:2851111")
+    compile fg.deobf("curse.maven:scaling-health-248027:2816920")
 }
 
 jar {
