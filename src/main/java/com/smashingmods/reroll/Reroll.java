@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(modid = Reroll.MODID, version = "1.12.2-1.5.5", useMetadata = true)
+@Mod(modid = Reroll.MODID, version = "1.12.2-1.5.6", useMetadata = true)
 @Mod.EventBusSubscriber
 public class Reroll {
     public static final String MODID = "reroll";
@@ -38,6 +38,8 @@ public class Reroll {
     // Mod Compatibility
     public static boolean MODCOMPAT_TIMEISUP;
     public static boolean MODCOMPAT_BAUBLES;
+    public static boolean MODCOMPAT_ELENAIDODGE;
+    public static boolean SCALING_HEALTH;
 
     @GameRegistry.ObjectHolder(DiceItem.name)
     public static final Item diceItem = Items.AIR;
@@ -62,6 +64,8 @@ public class Reroll {
     public void postInit(FMLPostInitializationEvent event) {
         MODCOMPAT_TIMEISUP = Loader.isModLoaded("timeisup");
         MODCOMPAT_BAUBLES = Loader.isModLoaded("baubles");
+        MODCOMPAT_ELENAIDODGE = Loader.isModLoaded("elenaidodge2");
+        SCALING_HEALTH = Loader.isModLoaded("scalinghealth");
 
         if (CONFIG.hasChanged()) {
             CONFIG.save();

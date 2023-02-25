@@ -7,6 +7,8 @@ import com.smashingmods.reroll.config.Config;
 import com.smashingmods.reroll.handler.InventoryHandler;
 import com.smashingmods.reroll.item.DiceItem;
 import com.smashingmods.reroll.util.PositionUtil;
+import com.smashingmods.reroll.handler.ScalingHealthHandler;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -54,16 +56,20 @@ public class PlayerLoginEvent {
                         rerollCapability.setLock(true);
                     }
                 }
+
+                if (Reroll.SCALING_HEALTH) {
+                    ScalingHealthHandler.setScalingHealth(entityPlayer);
+                }
             }
         }
     }
 
     private static void setPlayerToBlock(EntityPlayer player) {
-        BlockPos currentPosition = player.getPosition();
         World world = player.getEntityWorld();
+        BlockPos currentPosition = player.getPosition();
+        currentPosition = currentPosition.add(currentPosition.getX() > 0 ? Config.minDistance : -Config.minDistance, 0, currentPosition.getZ() > 0 ? Config.minDistance : -Config.minDistance);
         Optional<BlockPos> spawnBlock = PositionUtil.findClosest(currentPosition, Config.horizontalRange, Config.verticalRange, PositionUtil.blockStatePredicate(world));
         spawnBlock.ifPresent(blockPos -> player.setPositionAndUpdate(blockPos.getX() + 0.5d, blockPos.getY() + 1.5d, blockPos.getZ() + 0.5d));
-        spawnBlock.ifPresent(blockPos -> Reroll.LOGGER.info("Player {} was teleported to a suitable spawn block at {}, {}, {}", player.getName(), blockPos.getX() + 0.5d, blockPos.getY() + 1.5d, blockPos.getZ() + 0.5d));
     }
 
     private static void setInitialCooldown(EntityPlayerMP entityPlayer) {

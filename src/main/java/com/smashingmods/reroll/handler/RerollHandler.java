@@ -2,6 +2,9 @@ package com.smashingmods.reroll.handler;
 
 import baubles.api.BaublesApi;
 import baubles.api.inv.BaublesInventoryWrapper;
+import com.elenai.elenaidodge2.capability.dodges.DodgesProvider;
+import com.elenai.elenaidodge2.capability.dodges.IDodges;
+import com.elenai.elenaidodge2.network.message.CUpdateDodgeMessage;
 import com.smashingmods.reroll.Reroll;
 import com.smashingmods.reroll.capability.WorldSavedData;
 import com.smashingmods.reroll.config.Config;
@@ -153,9 +156,21 @@ public class RerollHandler {
             BaublesInventoryWrapper wrapper = new BaublesInventoryWrapper(BaublesApi.getBaublesHandler(entityPlayer));
             wrapper.func_174888_l();
         }
+
+        if (Reroll.MODCOMPAT_ELENAIDODGE) {
+            IDodges dodges = entityPlayer.getCapability(DodgesProvider.DODGES_CAP, null);
+            if (dodges != null) {
+                dodges.set(20);
+                com.elenai.elenaidodge2.network.PacketHandler.instance.sendTo(new CUpdateDodgeMessage(dodges.getDodges()), entityPlayer);
+            }
+        }
+
+        if (Reroll.SCALING_HEALTH) {
+            ScalingHealthHandler.setScalingHealth(entityPlayer);
+        }
     }
 
-    private void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
+    public void resetLocation(MinecraftServer server, EntityPlayerMP entityPlayer, boolean next) {
 
         WorldServer world;
         BlockPos newPosition;
@@ -167,8 +182,6 @@ public class RerollHandler {
         } else {
             world = server.getWorld(entityPlayer.getSpawnDimension());
         }
-
-        newPosition = generateValidBlockPos(world, next);
 
         if (!Config.useCurrentDim) {
             CommandSetDimension setDimension = new CommandSetDimension();
@@ -183,6 +196,8 @@ public class RerollHandler {
         } else {
             entityPlayer.setSpawnDimension(entityPlayer.dimension);
         }
+
+        newPosition = generateValidBlockPos(world, next);
 
         if (newPosition != null) {
             entityPlayer.setPositionAndUpdate(newPosition.getX() + 0.5d, newPosition.getY() + 1.5d, newPosition.getZ() + 0.5d);
